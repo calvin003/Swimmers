@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>swimmers — know your swimmers</title>
+<meta name="description" content="Swimmers is the modern male fertility platform. Join the waitlist.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#10202e;
+    --ink-dim:#5c7286;
+    --blue:#a9d3ea;        /* light blue (logo cross) */
+    --blue-deep:#2e7fb4;   /* secondary blue for contrast */
+    --blue-soft:#eaf4fa;
+    --border:#dfeaf2;
+    --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Sora',sans-serif;line-height:1.15}
+
+  /* ---- Big sperm in the back ---- */
+  .bg-swimmer{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .bg-swimmer svg{
+    position:absolute;
+    right:-10vw;
+    top:50%;
+    transform:translateY(-50%) rotate(-14deg);
+    width:78vw;
+    min-width:700px;
+    opacity:.45;
+  }
+  @keyframes drift{
+    0%,100%{transform:translateY(-50%) rotate(-14deg) translateX(0)}
+    50%{transform:translateY(-52%) rotate(-13deg) translateX(-16px)}
+  }
+  .bg-swimmer svg{animation:drift 8s ease-in-out infinite}
+
+  main{position:relative;z-index:1}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* ---- Nav ---- */
+  nav{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:28px 0;
+  }
+  .logo{
+    font-family:'Sora',sans-serif;font-weight:800;font-size:1.45rem;
+    letter-spacing:-.02em;color:var(--ink);
+    display:flex;align-items:center;gap:10px;
+  }
+  .logo svg{display:block}
+  nav .cta-mini{
+    font-size:.9rem;font-weight:600;color:#fff;
+    background:var(--blue-deep);
+    padding:10px 22px;border-radius:99px;text-decoration:none;
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  nav .cta-mini:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(46,127,180,.35)}
+
+  /* ---- Hero ---- */
+  .hero{
+    min-height:78vh;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;
+    padding:40px 0 60px;
+  }
+  .hero h1{
+    font-size:clamp(3.4rem,11vw,7.5rem);
+    font-weight:800;letter-spacing:-.04em;
+    color:var(--ink);
+    margin-bottom:14px;
+  }
+  .hero h1 .accent{color:var(--blue-deep)}
+  .hero .tag{
+    font-size:1.1rem;color:var(--ink-dim);
+    margin-bottom:42px;max-width:460px;
+  }
+
+  /* ---- Waitlist form ---- */
+  .waitlist{width:100%;max-width:480px}
+  .form-row{display:flex;gap:10px}
+  .form-row input{
+    flex:1;
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    padding:16px 18px;
+    color:var(--ink);
+    font-size:1rem;font-family:inherit;
+    outline:none;
+    transition:border-color .15s ease,box-shadow .15s ease;
+  }
+  .form-row input::placeholder{color:#9db1c2}
+  .form-row input:focus{border-color:var(--blue-deep);box-shadow:0 0 0 4px rgba(169,211,234,.35)}
+  .form-row button{
+    background:var(--blue-deep);
+    color:#fff;font-weight:700;font-size:1rem;font-family:'Sora',sans-serif;
+    border:none;border-radius:14px;
+    padding:16px 28px;cursor:pointer;white-space:nowrap;
+    transition:transform .15s ease,box-shadow .15s ease,background .15s ease;
+  }
+  .form-row button:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(46,127,180,.35)}
+  .form-row button:active{transform:translateY(0)}
+  .form-msg{margin-top:12px;font-size:.9rem;min-height:1.4em}
+  .form-msg.error{color:#d65454}
+  .form-msg.ok{color:var(--blue-deep)}
+  .privacy{margin-top:8px;font-size:.8rem;color:#9db1c2}
+  .success{
+    display:none;
+    background:var(--blue-soft);
+    border:1px solid var(--blue);
+    border-radius:var(--radius);
+    padding:26px 28px;
+    text-align:left;
+  }
+  .success h3{color:var(--blue-deep);margin-bottom:8px;font-size:1.2rem}
+  .success p{color:var(--ink-dim);font-size:.95rem}
+  .counter{
+    margin-top:30px;display:flex;align-items:center;gap:12px;justify-content:center;
+    color:var(--ink-dim);font-size:.9rem;
+  }
+  .avatars{display:flex}
+  .avatars span{
+    width:32px;height:32px;border-radius:50%;
+    border:2px solid #fff;
+    margin-left:-8px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.75rem;font-weight:700;color:#fff;
+  }
+  .avatars span:first-child{margin-left:0}
+
+  footer{
+    border-top:1px solid var(--border);
+    padding:30px 0;
+    display:flex;justify-content:space-between;align-items:center;
+    color:#9db1c2;font-size:.85rem;
+  }
+  footer .logo{font-size:1rem}
+
+  @media(max-width:760px){
+    .form-row{flex-direction:column}
+    .bg-swimmer svg{width:150vw;right:-55vw;opacity:.3}
+    footer{flex-direction:column;gap:12px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .bg-swimmer svg{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- Big sperm in the back (x-ray style) -->
+<div class="bg-swimmer" aria-hidden="true">
+  <svg viewBox="0 0 1000 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="headGrad" cx="42%" cy="40%" r="75%">
+        <stop offset="0%" stop-color="#dceefb"/>
+        <stop offset="55%" stop-color="#bcd9ec"/>
+        <stop offset="100%" stop-color="#8fb9d6"/>
+      </radialGradient>
+      <radialGradient id="innerGrad" cx="45%" cy="40%" r="70%">
+        <stop offset="0%" stop-color="#eef7fd"/>
+        <stop offset="100%" stop-color="#a9cde6"/>
+      </radialGradient>
+      <linearGradient id="tailGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#9ec6e0"/>
+        <stop offset="100%" stop-color="#cfe6f4"/>
+      </linearGradient>
+    </defs>
+    <!-- outer head membrane -->
+    <ellipse cx="270" cy="300" rx="180" ry="135" fill="url(#headGrad)" opacity=".55"/>
+    <!-- inner head -->
+    <ellipse cx="255" cy="290" rx="130" ry="100" fill="url(#innerGrad)" opacity=".85"/>
+    <ellipse cx="225" cy="262" rx="48" ry="30" fill="#ffffff" opacity=".5"/>
+    <!-- midpiece taper -->
+    <path d="M420 280 C 480 268 520 264 565 268 C 530 296 480 308 430 318 Z" fill="#b6d6ea" opacity=".7"/>
+    <!-- tail -->
+    <path d="M560 268 C 650 258 690 220 760 226 C 830 232 850 290 920 282 C 960 277 975 250 990 235"
+      stroke="url(#tailGrad)" stroke-width="16" stroke-linecap="round" opacity=".8"/>
+    <path d="M560 268 C 650 258 690 220 760 226 C 830 232 850 290 920 282 C 960 277 975 250 990 235"
+      stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+  </svg>
+</div>
+
+<main>
+  <div class="wrap">
+
+    <nav>
+      <div class="logo">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#a9d3ea"/>
+        </svg>
+        swimmers
+      </div>
+      <a class="cta-mini" href="#join">Join waitlist</a>
+    </nav>
+
+    <header class="hero" id="join">
+      <h1>swimmers<span class="accent">.</span></h1>
+      <p class="tag">The modern male fertility platform. Test from home, get real answers, improve your numbers.</p>
+
+      <div class="waitlist">
+        <form id="waitlistForm" novalidate>
+          <div class="form-row">
+            <input type="email" id="email" placeholder="Enter your email" autocomplete="email" aria-label="Email address" required>
+            <button type="submit">Join the waitlist</button>
+          </div>
+          <p class="form-msg" id="formMsg" role="status"></p>
+          <p class="privacy">🔒 No spam. We'll only email you when it matters.</p>
+        </form>
+        <div class="success" id="successBox">
+          <h3>You're on the list! 🎉</h3>
+          <p>Welcome to swimmers. We'll email <b id="confirmedEmail"></b> as soon as early access opens. You're swimmer #<b id="position"></b> in line.</p>
+        </div>
+        <div class="counter">
+          <div class="avatars">
+            <span style="background:#2e7fb4">J</span>
+            <span style="background:#a9d3ea">M</span>
+            <span style="background:#5ca8d4">D</span>
+            <span style="background:#10202e">A</span>
+          </div>
+          <span><b id="countNum">2,847</b> guys already on the waitlist</span>
+        </div>
+      </div>
+    </header>
+
+    <footer>
+      <div class="logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#a9d3ea"/>
+        </svg>
+        swimmers
+      </div>
+      <span>© 2026 Swimmers Health, Inc. Not medical advice.</span>
+    </footer>
+
+  </div>
+</main>
+
+<script>
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  let count = 2847;
+  const signups = new Set();
+  const form = document.getElementById('waitlistForm');
+  const input = document.getElementById('email');
+  const msg = document.getElementById('formMsg');
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const email = input.value.trim().toLowerCase();
+    msg.className = 'form-msg';
+    if(!EMAIL_RE.test(email)){
+      msg.textContent = 'Please enter a valid email address.';
+      msg.classList.add('error');
+      input.focus();
+      return;
+    }
+    if(signups.has(email)){
+      msg.textContent = "You're already on the list — see you at launch!";
+      msg.classList.add('ok');
+      return;
+    }
+    signups.add(email);
+    count++;
+    document.getElementById('countNum').textContent = count.toLocaleString();
+    // TODO: wire to your backend / Formspree endpoint here
+    document.getElementById('confirmedEmail').textContent = email;
+    document.getElementById('position').textContent = count.toLocaleString();
+    form.style.display = 'none';
+    document.getElementById('successBox').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>
