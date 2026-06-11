@@ -285,10 +285,10 @@
 
     <div class="lb-head">
       <h2 class="serif">Top swimmers</h2>
-      <span>swim score = motility · count · morphology</span>
+      <span>swim score = resting ×.40 + active ×.30 + recovery ×.20 + SpO2 ×.10</span>
     </div>
     <div class="lb-card" id="lbCard"></div>
-    <p class="lb-foot">Demo rankings. Order your kit at launch to get your real swim score on the board. 🏊</p>
+    <p class="lb-foot">Live rankings from real heart checks. <a href="heart.html" style="color:inherit"><b>Log yours</b></a> to get on the board. 🏊</p>
   </section>
 </main>
 
@@ -346,10 +346,15 @@
     }
   })();
 </script>
-<script src="data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  /* ---- Swim rankings (shared demo roster in data.js) ---- */
+  /* ---- Swim rankings (live from the backend heart_leaderboard view) ---- */
+  const SUPABASE_URL = 'https://omfnsjrsswuxkqubagzr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tZm5zanJzc3d1eGtxdWJhZ3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk4MjgsImV4cCI6MjA5NjcwNTgyOH0.lJuGVbc3XZRiQoPPIZjtp1bYNezTVrjt4xKF7-sO-AA';
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   const MEDALS = ['🥇','🥈','🥉'];
+  const COLORS = ['#3585bd','#5fb0dd','#7bbede','#2e6f9e','#4a9fd2','#6cb5de','#35648d','#58a7d6'];
 
   const email = sessionStorage.getItem('swimmers_email') || '';
   if(email){
@@ -358,40 +363,73 @@
   }
 
   const card = document.getElementById('lbCard');
-  const rows = SWIMMERS_DATA.map((r, i) => `
-    <a class="lb-row" href="profile.html?u=${r.slug}" data-name="${r.name.toLowerCase()}">
-      <div class="lb-rank ${i < 3 ? 'medal' : ''}">${MEDALS[i] || i + 1}</div>
-      <div class="lb-who">
-        <span class="lb-avatar" style="background:${r.color}">${r.name[0]}</span>
-        <div>
-          <div class="lb-name">${r.name}</div>
-          <div class="lb-sub">${r.stats.motility.value}% motile</div>
+
+  async function loadBoard(){
+    const { data, error } = await db
+      .from('heart_leaderboard')
+      .select('*')
+      .order('swim_score', { ascending: false })
+      .order('created_at', { ascending: true });
+
+    if(error || !data){
+      console.error(error);
+      card.innerHTML = '<div class="lb-empty" style="display:block">Could not load the rankings. Please refresh.</div>';
+      return;
+    }
+
+    // best entry per swimmer (by name, case-insensitive)
+    const best = [];
+    const seen = new Set();
+    for(const r of data){
+      const key = (r.name || '').trim().toLowerCase();
+      if(!key || seen.has(key)) continue;
+      seen.add(key);
+      best.push(r);
+    }
+
+    const rows = best.map((r, i) => `
+      <a class="lb-row" href="profile.html?u=${r.id}" data-name="${(r.name||'').toLowerCase()}">
+        <div class="lb-rank ${i < 3 ? 'medal' : ''}">${MEDALS[i] || i + 1}</div>
+        <div class="lb-who">
+          <span class="lb-avatar" style="background:${COLORS[i % COLORS.length]}">${(r.name||'?')[0].toUpperCase()}</span>
+          <div>
+            <div class="lb-name">${r.name}</div>
+            <div class="lb-sub">${r.resting_hr}→${r.active_hr} bpm · SpO2 ${r.spo2 != null ? r.spo2 + '%' : '—'}</div>
+          </div>
         </div>
-      </div>
-      <div class="lb-bar"><i data-width="${r.score}"></i></div>
-      <div class="lb-score">${r.score}<small>swim score</small></div>
-    </a>`);
+        <div class="lb-bar"><i data-width="${r.swim_score}"></i></div>
+        <div class="lb-score">${r.swim_score}<small>swim score</small></div>
+      </a>`);
 
-  rows.push(`
-    <div class="lb-row you" data-name="you ${email.toLowerCase()}">
-      <div class="lb-rank">—</div>
-      <div class="lb-who">
-        <span class="lb-avatar" style="background:#7bbede">${(email[0] || '?').toUpperCase()}</span>
-        <div>
-          <div class="lb-name">You</div>
-          <div class="lb-sub">untested — kit ships at launch</div>
+    rows.push(`
+      <div class="lb-row you" data-name="you ${email.toLowerCase()}">
+        <div class="lb-rank">—</div>
+        <div class="lb-who">
+          <span class="lb-avatar" style="background:#7bbede">${(email[0] || '?').toUpperCase()}</span>
+          <div>
+            <div class="lb-name">You</div>
+            <div class="lb-sub">no heart check yet — <a href="heart.html" style="color:inherit"><b>log one</b></a></div>
+          </div>
         </div>
-      </div>
-      <div class="lb-bar"><i data-width="0"></i></div>
-      <div class="lb-score">?<small>swim score</small></div>
-    </div>`);
+        <div class="lb-bar"><i data-width="0"></i></div>
+        <div class="lb-score">?<small>swim score</small></div>
+      </div>`);
 
-  rows.push(`
-    <div class="lb-empty" id="lbEmpty">
-      No swimmer by that name yet. <b>Join the waitlist and claim it at launch.</b> 🏊
-    </div>`);
+    rows.push(`
+      <div class="lb-empty" id="lbEmpty">
+        No swimmer by that name yet. <b>Log a heart check and claim your spot.</b> 🏊
+      </div>`);
 
-  card.innerHTML = rows.join('');
+    card.innerHTML = rows.join('');
+
+    // let the rows paint at width 0, then animate the bars in
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      card.querySelectorAll('.lb-bar i').forEach(bar => {
+        bar.style.width = bar.dataset.width + '%';
+      });
+    }));
+  }
+  loadBoard();
 
   /* ---- Name search ---- */
   const searchInput = document.getElementById('lbSearch');
@@ -403,14 +441,9 @@
       row.style.display = hit ? '' : 'none';
       if(hit) visible++;
     });
-    document.getElementById('lbEmpty').style.display = visible ? 'none' : 'block';
+    const empty = document.getElementById('lbEmpty');
+    if(empty) empty.style.display = visible ? 'none' : 'block';
   });
-  // let the rows paint at width 0, then animate the bars in
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    card.querySelectorAll('.lb-bar i').forEach(bar => {
-      bar.style.width = bar.dataset.width + '%';
-    });
-  }));
 </script>
 
 </body>

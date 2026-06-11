@@ -321,14 +321,14 @@
     </div>
 
     <div class="sec-head">
-      <h2 class="serif">Lab numbers</h2>
-      <span>vs WHO reference ranges</span>
+      <h2 class="serif">Heart metrics</h2>
+      <span>from your latest heart check</span>
     </div>
     <div class="stats" id="pStats"></div>
 
     <div class="sec-head">
-      <h2 class="serif">Lifestyle factors</h2>
-      <span>the stuff that moves the score</span>
+      <h2 class="serif">Score breakdown</h2>
+      <span>swim score = resting ×.40 + active ×.30 + recovery ×.20 + SpO2 ×.10</span>
     </div>
     <div class="life" id="pLife"></div>
 
@@ -339,14 +339,14 @@
 
     <div class="p-cta">
       <h3 id="pCtaTitle"></h3>
-      <p>Test from home at launch, get your own profile, and climb the board.</p>
-      <a href="index.html#join">Join the waitlist</a>
+      <p>Log a heart check, get your own profile, and climb the board.</p>
+      <a href="heart.html">Log a heart check</a>
     </div>
   </section>
 
   <section class="p-missing" id="missingSection">
     <h1 class="serif">No swimmer here yet 🏊</h1>
-    <p>This profile doesn't exist — maybe it's waiting for you to claim it.</p>
+    <p>This profile doesn't exist — log a heart check to claim yours.</p>
     <p style="margin-top:18px"><a class="back" href="leaderboard.html">← Back to rankings</a></p>
   </section>
 </main>
@@ -382,64 +382,117 @@
     }
   })();
 </script>
-<script src="data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const STAT_LABELS = {
-    motility:   'Motility',
-    count:      'Sperm count',
-    morphology: 'Morphology',
-    volume:     'Volume',
-    vitality:   'Vitality'
-  };
+  /* ---- Fertility profile (live from the backend heart_leaderboard view) ---- */
+  const SUPABASE_URL = 'https://omfnsjrsswuxkqubagzr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tZm5zanJzc3d1eGtxdWJhZ3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk4MjgsImV4cCI6MjA5NjcwNTgyOH0.lJuGVbc3XZRiQoPPIZjtp1bYNezTVrjt4xKF7-sO-AA';
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const slug = new URLSearchParams(location.search).get('u');
-  const idx = SWIMMERS_DATA.findIndex(s => s.slug === slug);
-  const p = SWIMMERS_DATA[idx];
+  const COLORS = ['#3585bd','#5fb0dd','#7bbede','#2e6f9e','#4a9fd2','#6cb5de','#35648d','#58a7d6'];
 
-  if (!p) {
-    document.getElementById('missingSection').style.display = 'block';
-  } else {
+  function fmtRecovery(secs){
+    const m = Math.floor(secs / 60), s = secs % 60;
+    return (m ? m + 'm ' : '') + s + 's';
+  }
+
+  async function loadProfile(){
+    const id = parseInt(new URLSearchParams(location.search).get('u'), 10);
+
+    const { data, error } = await db
+      .from('heart_leaderboard')
+      .select('*')
+      .order('swim_score', { ascending: false })
+      .order('created_at', { ascending: true });
+
+    if(error){ console.error(error); }
+    const board = data || [];
+
+    // same dedupe as the leaderboard (best entry per name)
+    const best = [];
+    const seen = new Set();
+    for(const r of board){
+      const key = (r.name || '').trim().toLowerCase();
+      if(!key || seen.has(key)) continue;
+      seen.add(key);
+      best.push(r);
+    }
+
+    const p = board.find(r => r.id === id);
+    if (!p) {
+      document.getElementById('missingSection').style.display = 'block';
+      return;
+    }
+
+    const rankIdx = best.findIndex(r => (r.name||'').trim().toLowerCase() === (p.name||'').trim().toLowerCase());
+
     document.title = 'swimmers — ' + p.name;
     document.getElementById('profileSection').style.display = 'block';
 
     const avatar = document.getElementById('pAvatar');
-    avatar.textContent = p.name[0];
-    avatar.style.background = p.color;
+    avatar.textContent = (p.name || '?')[0].toUpperCase();
+    avatar.style.background = COLORS[(rankIdx >= 0 ? rankIdx : 0) % COLORS.length];
 
     document.getElementById('pName').textContent = p.name;
-    document.getElementById('pMeta').textContent = p.age + ' · ' + p.tagline;
-    document.getElementById('pRank').textContent = '#' + (idx + 1) + ' on the swim rankings';
-    document.getElementById('pScore').textContent = p.score;
-    document.getElementById('pTrend').innerHTML = 'Trend: <b>' + p.trend + '</b>';
+    document.getElementById('pMeta').textContent =
+      'Heart check ' + new Date(p.created_at).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'}) +
+      ' · ECG: ' + (p.ecg_reading || 'not logged');
+    document.getElementById('pRank').textContent =
+      rankIdx >= 0 ? '#' + (rankIdx + 1) + ' on the swim rankings' : 'on the swim rankings';
+    document.getElementById('pScore').textContent = p.swim_score;
+    document.getElementById('pTrend').innerHTML =
+      'Swim score: <b>' + p.swim_score + '</b> — resting ' + p.resting_score + ' ×.40 + active ' +
+      p.active_score + ' ×.30 + recovery ' + p.recovery_score + ' ×.20 + SpO2 ' + p.spo2_score + ' ×.10';
 
-    document.getElementById('pStats').innerHTML = Object.entries(p.stats).map(([key, s]) => `
+    const METRICS = [
+      { label: 'Resting heart rate', value: p.resting_hr, unit: 'bpm',  pct: p.resting_score,  ref: 'score ' + p.resting_score + '/100 · weight 40%' },
+      { label: 'Active heart rate',  value: p.active_hr,  unit: 'bpm',  pct: p.active_score,   ref: 'score ' + p.active_score + '/100 · weight 30%' },
+      { label: 'Recovery time',      value: fmtRecovery(p.recovery_seconds), unit: '', pct: p.recovery_score, ref: 'score ' + p.recovery_score + '/100 · weight 20%' },
+      { label: 'SpO2',               value: p.spo2 != null ? p.spo2 : '—', unit: p.spo2 != null ? '%' : '', pct: p.spo2_score, ref: 'score ' + p.spo2_score + '/100 · weight 10%' }
+    ];
+    document.getElementById('pStats').innerHTML = METRICS.map(m => `
       <div class="stat">
-        <div class="s-label">${STAT_LABELS[key]}</div>
-        <div class="s-value">${s.value}<small>${s.unit}</small></div>
-        <div class="s-bar"><i data-width="${s.pct}"></i></div>
-        <div class="s-ref">${s.ref}</div>
+        <div class="s-label">${m.label}</div>
+        <div class="s-value">${m.value}<small>${m.unit}</small></div>
+        <div class="s-bar"><i data-width="${m.pct}"></i></div>
+        <div class="s-ref">${m.ref}</div>
       </div>`).join('');
 
-    document.getElementById('pLife').innerHTML = p.lifestyle.map(l => `
+    const PARTS = [
+      { label: 'Resting ×.40',  pts: Math.round(p.resting_score * 0.40 * 10) / 10, good: p.resting_score >= 50, note: p.resting_score + '/100 → ' + (Math.round(p.resting_score * 0.40 * 10) / 10) + ' pts toward your score' },
+      { label: 'Active ×.30',   pts: Math.round(p.active_score * 0.30 * 10) / 10, good: p.active_score >= 50, note: p.active_score + '/100 → ' + (Math.round(p.active_score * 0.30 * 10) / 10) + ' pts toward your score' },
+      { label: 'Recovery ×.20', pts: Math.round(p.recovery_score * 0.20 * 10) / 10, good: p.recovery_score >= 50, note: p.recovery_score + '/100 → ' + (Math.round(p.recovery_score * 0.20 * 10) / 10) + ' pts toward your score' },
+      { label: 'SpO2 ×.10',     pts: Math.round(p.spo2_score * 0.10 * 10) / 10, good: p.spo2_score >= 50, note: p.spo2_score + '/100 → ' + (Math.round(p.spo2_score * 0.10 * 10) / 10) + ' pts toward your score' }
+    ];
+    document.getElementById('pLife').innerHTML = PARTS.map(l => `
       <div class="life-row">
         <span class="life-dot ${l.good ? 'good' : 'warn'}">${l.good ? '✓' : '!'}</span>
         <span class="l-label">${l.label}</span>
         <span class="l-note">${l.note}</span>
       </div>`).join('');
 
-    document.getElementById('pBadges').innerHTML = p.badges.map(b =>
+    const badges = [];
+    if (rankIdx === 0) badges.push('👑 Top swimmer');
+    if (p.swim_score >= 80) badges.push('🏆 Elite engine');
+    if (p.resting_score >= 70) badges.push('🧘 Low + slow resting HR');
+    if (p.recovery_score >= 80) badges.push('⚡ Rapid recovery');
+    if (p.spo2 != null && p.spo2 >= 97) badges.push('🫁 Oxygen rich');
+    if (p.ecg_reading === 'Sinus rhythm') badges.push('💓 Steady sinus rhythm');
+    if (!badges.length) badges.push('🏊 Getting started');
+    document.getElementById('pBadges').innerHTML = badges.map(b =>
       `<span class="badge">${b}</span>`).join('');
 
     document.getElementById('pCtaTitle').textContent = 'Think you can beat ' + p.name.split(' ')[0] + '?';
 
     // animate score ring + stat bars after first paint
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      document.getElementById('pRing').style.setProperty('--p', p.score);
+      document.getElementById('pRing').style.setProperty('--p', p.swim_score);
       document.querySelectorAll('.s-bar i').forEach(bar => {
         bar.style.width = bar.dataset.width + '%';
       });
     }));
   }
+  loadProfile();
 </script>
 
 </body>
