@@ -577,18 +577,10 @@
     const original = button.textContent;
     button.textContent = 'Joining…';
 
+    // Save the email, but route to the leaderboard no matter what —
+    // a backend hiccup shouldn't strand the user on the form.
     const { error } = await db.from('waitlist').insert({ email });
-
-    button.disabled = false;
-    button.textContent = original;
-
-    // 23505 = unique_violation → already on the list; treat as success
-    if(error && error.code !== '23505'){
-      console.error(error);
-      msg.textContent = 'Something went wrong. Please try again.';
-      msg.classList.add('error');
-      return;
-    }
+    if(error && error.code !== '23505') console.error(error); // 23505 = already on the list
 
     sessionStorage.setItem('swimmers_email', email);
     location.href = 'leaderboard.html';
