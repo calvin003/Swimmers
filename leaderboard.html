@@ -104,6 +104,32 @@
   .board .tag{color:var(--ink-dim);font-size:1rem;margin-bottom:34px}
 
   /* ---- Leaderboard ---- */
+  /* ---- Search ---- */
+  .lb-search{position:relative;margin-bottom:22px}
+  .lb-search input{
+    width:100%;
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    padding:14px 18px 14px 46px;
+    color:var(--ink);
+    font-size:1rem;font-family:inherit;
+    outline:none;
+    transition:border-color .15s ease,box-shadow .15s ease;
+  }
+  .lb-search input::placeholder{color:#9db1c2}
+  .lb-search input:focus{border-color:var(--blue-deep);box-shadow:0 0 0 4px rgba(169,211,234,.35)}
+  .lb-search svg{
+    position:absolute;left:16px;top:50%;transform:translateY(-50%);
+    pointer-events:none;
+  }
+  .lb-empty{
+    display:none;
+    padding:34px 20px;text-align:center;
+    color:var(--ink-dim);font-size:.92rem;
+  }
+  .lb-empty b{color:var(--blue-deep)}
+
   .lb-head{
     display:flex;justify-content:space-between;align-items:baseline;
     margin-bottom:14px;padding:0 4px;
@@ -128,6 +154,7 @@
   .lb-row.you{
     background:var(--blue-soft);
     border-top:1px solid var(--blue);
+    border-bottom:none;
   }
   .lb-rank{
     font-family:'Sora',sans-serif;font-weight:800;font-size:1rem;
@@ -238,6 +265,14 @@
       <h1>swim rankings<span class="accent">.</span></h1>
       <p class="tag">How healthy are your swimmers? Test from home at launch and claim your spot.</p>
 
+      <div class="lb-search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" stroke="#9db1c2" stroke-width="2"/>
+          <path d="M16.5 16.5L21 21" stroke="#9db1c2" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input type="search" id="lbSearch" placeholder="Search for your name…" aria-label="Search the leaderboard by name">
+      </div>
+
       <div class="lb-head">
         <h2>Top swimmers</h2>
         <span>swim score = motility · count · morphology</span>
@@ -259,6 +294,7 @@
   </div>
 </main>
 
+<script src="swim-bg.js"></script>
 <script>
   /* ---- Swim rankings (demo data until kits ship) ---- */
   const AVATAR_COLORS = ['#2e7fb4','#a9d3ea','#5ca8d4','#10202e','#7bbede'];
@@ -281,7 +317,7 @@
 
   const card = document.getElementById('lbCard');
   const rows = RANKINGS.map((r, i) => `
-    <div class="lb-row">
+    <div class="lb-row" data-name="${r.name.toLowerCase()}">
       <div class="lb-rank ${i < 3 ? 'medal' : ''}">${MEDALS[i] || i + 1}</div>
       <div class="lb-who">
         <span class="lb-avatar" style="background:${AVATAR_COLORS[i % AVATAR_COLORS.length]}">${r.name[0]}</span>
@@ -295,7 +331,7 @@
     </div>`);
 
   rows.push(`
-    <div class="lb-row you">
+    <div class="lb-row you" data-name="you ${email.toLowerCase()}">
       <div class="lb-rank">—</div>
       <div class="lb-who">
         <span class="lb-avatar" style="background:${AVATAR_COLORS[4]}">${(email[0] || '?').toUpperCase()}</span>
@@ -308,7 +344,25 @@
       <div class="lb-score">?<small>swim score</small></div>
     </div>`);
 
+  rows.push(`
+    <div class="lb-empty" id="lbEmpty">
+      No swimmer by that name yet. <b>Join the waitlist and claim it at launch.</b> 🏊
+    </div>`);
+
   card.innerHTML = rows.join('');
+
+  /* ---- Name search ---- */
+  const searchInput = document.getElementById('lbSearch');
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    let visible = 0;
+    card.querySelectorAll('.lb-row').forEach(row => {
+      const hit = !q || row.dataset.name.includes(q);
+      row.style.display = hit ? '' : 'none';
+      if(hit) visible++;
+    });
+    document.getElementById('lbEmpty').style.display = visible ? 'none' : 'block';
+  });
   // let the rows paint at width 0, then animate the bars in
   requestAnimationFrame(() => requestAnimationFrame(() => {
     card.querySelectorAll('.lb-bar i').forEach(bar => {
