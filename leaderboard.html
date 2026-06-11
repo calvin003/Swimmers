@@ -368,6 +368,9 @@
 
   const card = document.getElementById('lbCard');
 
+  // deterministic placeholder headshot per entry (licensed fake-people photos)
+  const portrait = id => `https://randomuser.me/api/portraits/men/${id % 99}.jpg`;
+
   async function loadBoard(){
     const { data, error } = await db
       .from('heart_leaderboard')
@@ -395,10 +398,10 @@
       <a class="lb-row" href="profile.html?u=${r.id}" data-name="${(r.name||'').toLowerCase()}">
         <div class="lb-rank ${i < 3 ? 'medal' : ''}">${MEDALS[i] || i + 1}</div>
         <div class="lb-who">
-          <span class="lb-avatar" style="background:${COLORS[i % COLORS.length]}">${(r.name||'?')[0].toUpperCase()}</span>
+          <span class="lb-avatar" style="background:${COLORS[i % COLORS.length]};background-image:url('${portrait(r.id)}');background-size:cover;background-position:center"></span>
           <div>
             <div class="lb-name">${r.name}</div>
-            <div class="lb-sub">${r.resting_hr}→${r.active_hr} bpm · SpO2 ${r.spo2 != null ? r.spo2 + '%' : '—'}</div>
+            <div class="lb-sub">${r.origin ? r.origin + ' · ' : ''}${r.resting_hr}→${r.active_hr} bpm · SpO2 ${r.spo2 != null ? r.spo2 + '%' : '—'}</div>
           </div>
         </div>
         <div class="lb-bar"><i data-width="${r.swim_score}"></i></div>

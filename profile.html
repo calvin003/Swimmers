@@ -430,11 +430,15 @@
     document.getElementById('profileSection').style.display = 'block';
 
     const avatar = document.getElementById('pAvatar');
-    avatar.textContent = (p.name || '?')[0].toUpperCase();
     avatar.style.background = COLORS[(rankIdx >= 0 ? rankIdx : 0) % COLORS.length];
+    // deterministic placeholder headshot (licensed fake-people photos)
+    avatar.style.backgroundImage = `url('https://randomuser.me/api/portraits/men/${p.id % 99}.jpg')`;
+    avatar.style.backgroundSize = 'cover';
+    avatar.style.backgroundPosition = 'center';
 
     document.getElementById('pName').textContent = p.name;
     document.getElementById('pMeta').textContent =
+      (p.origin ? p.origin + ' · ' : '') +
       'Heart check ' + new Date(p.created_at).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'}) +
       ' · ECG: ' + (p.ecg_reading || 'not logged');
     document.getElementById('pRank').textContent =
