@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>swimmers — heart check</title>
+<meta name="description" content="Log your heart rate recovery. Cardio health and fertility go hand in hand.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#10202e;
+    --ink-dim:#5c7286;
+    --blue:#a9d3ea;        /* light blue (logo cross) */
+    --blue-deep:#2e7fb4;   /* secondary blue for contrast */
+    --blue-soft:#eaf4fa;
+    --border:#dfeaf2;
+    --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Sora',sans-serif;line-height:1.15}
+
+  main{position:relative;z-index:1}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* ---- Nav ---- */
+  nav{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:28px 0;
+  }
+  .logo{
+    font-family:'Sora',sans-serif;font-weight:800;font-size:1.45rem;
+    letter-spacing:-.02em;color:var(--ink);
+    display:flex;align-items:center;gap:10px;
+    text-decoration:none;
+  }
+  .logo svg{display:block}
+  nav .cta-mini{
+    font-size:.9rem;font-weight:600;color:#fff;
+    background:var(--blue-deep);
+    padding:10px 22px;border-radius:99px;text-decoration:none;
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  nav .cta-mini:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(46,127,180,.35)}
+
+  /* ---- Page ---- */
+  .heart{
+    max-width:560px;margin:0 auto;
+    padding:30px 0 80px;
+    animation:rise .45s ease both;
+  }
+  @keyframes rise{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .heart h1{
+    font-size:clamp(2.2rem,6vw,3.2rem);
+    font-weight:800;letter-spacing:-.03em;
+    margin-bottom:6px;
+  }
+  .heart h1 .accent{color:var(--blue-deep)}
+  .heart .tag{color:var(--ink-dim);font-size:1rem;margin-bottom:30px}
+
+  .hr-card{
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:0 10px 40px rgba(46,127,180,.08);
+    padding:28px;
+  }
+  .field{margin-bottom:18px}
+  .field:last-of-type{margin-bottom:0}
+  .field label{
+    display:block;
+    font-size:.82rem;font-weight:600;color:var(--ink-dim);
+    margin-bottom:6px;
+  }
+  .field .hint{font-weight:400;color:#9db1c2}
+  .field input{
+    width:100%;
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    padding:14px 16px;
+    color:var(--ink);
+    font-size:1rem;font-family:inherit;
+    outline:none;
+    transition:border-color .15s ease,box-shadow .15s ease;
+  }
+  .field input::placeholder{color:#9db1c2}
+  .field input:focus{border-color:var(--blue-deep);box-shadow:0 0 0 4px rgba(169,211,234,.35)}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  .hr-card button{
+    width:100%;margin-top:22px;
+    background:var(--blue-deep);
+    color:#fff;font-weight:700;font-size:1rem;font-family:'Sora',sans-serif;
+    border:none;border-radius:14px;
+    padding:16px 28px;cursor:pointer;
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  .hr-card button:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(46,127,180,.35)}
+  .hr-card button:active{transform:translateY(0)}
+  .hr-card button:disabled{opacity:.6;cursor:default;transform:none;box-shadow:none}
+  .form-msg{margin-top:12px;font-size:.9rem;min-height:1.4em;text-align:center}
+  .form-msg.error{color:#d65454}
+
+  /* ---- Success ---- */
+  .success{
+    display:none;
+    background:var(--blue-soft);
+    border:1px solid var(--blue);
+    border-radius:var(--radius);
+    padding:28px;
+    text-align:center;
+  }
+  .success h3{color:var(--blue-deep);font-size:1.25rem;margin-bottom:6px}
+  .success p{color:var(--ink-dim);font-size:.95rem}
+  .success .drop{
+    font-family:'Sora',sans-serif;font-weight:800;font-size:2.6rem;color:var(--blue-deep);
+    margin:14px 0 2px;line-height:1;
+  }
+  .success .drop-lbl{font-size:.78rem;color:#9db1c2;margin-bottom:14px}
+  .success a{
+    display:inline-block;margin-top:16px;
+    font-size:.9rem;font-weight:600;color:var(--blue-deep);text-decoration:none;
+  }
+  .success a:hover{text-decoration:underline}
+
+  footer{
+    border-top:1px solid var(--border);
+    padding:30px 0;
+    display:flex;justify-content:space-between;align-items:center;
+    color:#9db1c2;font-size:.85rem;
+  }
+  footer .logo{font-size:1rem}
+
+  @media(max-width:560px){
+    .two-col{grid-template-columns:1fr}
+    footer{flex-direction:column;gap:12px}
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="wrap">
+
+    <nav>
+      <a class="logo" href="index.html">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#a9d3ea"/>
+        </svg>
+        swimmers
+      </a>
+      <a class="cta-mini" href="leaderboard.html">Swim rankings</a>
+    </nav>
+
+    <section class="heart">
+      <h1>heart check<span class="accent">.</span></h1>
+      <p class="tag">Strong heart, strong swimmers. Log how fast your heart bounces back after exercise — recovery speed is one of the best simple markers of cardio health.</p>
+
+      <div class="hr-card" id="hrCard">
+        <form id="hrForm" novalidate>
+          <div class="two-col">
+            <div class="field">
+              <label for="name">Name</label>
+              <input type="text" id="name" placeholder="Your name" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="you@school.edu" autocomplete="email" required>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="field">
+              <label for="restingHr">Resting heart rate <span class="hint">(bpm)</span></label>
+              <input type="number" id="restingHr" placeholder="e.g. 62" min="30" max="120" inputmode="numeric" required>
+            </div>
+            <div class="field">
+              <label for="activeHr">Active heart rate <span class="hint">(bpm, right after exercise)</span></label>
+              <input type="number" id="activeHr" placeholder="e.g. 160" min="60" max="230" inputmode="numeric" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="recoverySecs">Recovery time <span class="hint">(seconds from active back to resting)</span></label>
+            <input type="number" id="recoverySecs" placeholder="e.g. 120" min="5" max="3600" inputmode="numeric" required>
+          </div>
+          <button type="submit">Log my heart check</button>
+          <p class="form-msg" id="formMsg" role="status"></p>
+        </form>
+      </div>
+
+      <div class="success" id="successBox">
+        <h3>Logged! 🫀</h3>
+        <div class="drop" id="dropNum"></div>
+        <div class="drop-lbl">bpm recovered in <b id="dropTime"></b></div>
+        <p id="dropNote"></p>
+        <a href="leaderboard.html">← Back to swim rankings</a>
+      </div>
+    </section>
+
+    <footer>
+      <a class="logo" href="index.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#a9d3ea"/>
+        </svg>
+        swimmers
+      </a>
+      <span>© 2026 Swimmers Health, Inc. Not medical advice.</span>
+    </footer>
+
+  </div>
+</main>
+
+<script src="swim-bg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://omfnsjrsswuxkqubagzr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tZm5zanJzc3d1eGtxdWJhZ3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk4MjgsImV4cCI6MjA5NjcwNTgyOH0.lJuGVbc3XZRiQoPPIZjtp1bYNezTVrjt4xKF7-sO-AA';
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const form = document.getElementById('hrForm');
+  const msg = document.getElementById('formMsg');
+  const button = form.querySelector('button');
+
+  // pre-fill email if they came from the waitlist
+  const savedEmail = sessionStorage.getItem('swimmers_email');
+  if(savedEmail) document.getElementById('email').value = savedEmail;
+
+  function fail(text, el){
+    msg.textContent = text;
+    msg.classList.add('error');
+    if(el) el.focus();
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    msg.className = 'form-msg';
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const resting = parseInt(document.getElementById('restingHr').value, 10);
+    const active = parseInt(document.getElementById('activeHr').value, 10);
+    const recovery = parseInt(document.getElementById('recoverySecs').value, 10);
+
+    if(!name) return fail('Please enter your name.', document.getElementById('name'));
+    if(!EMAIL_RE.test(email)) return fail('Please enter a valid email address.', document.getElementById('email'));
+    if(!(resting >= 30 && resting <= 120)) return fail('Resting heart rate should be 30–120 bpm.', document.getElementById('restingHr'));
+    if(!(active >= 60 && active <= 230)) return fail('Active heart rate should be 60–230 bpm.', document.getElementById('activeHr'));
+    if(active <= resting) return fail('Active heart rate should be higher than resting.', document.getElementById('activeHr'));
+    if(!(recovery >= 5 && recovery <= 3600)) return fail('Recovery time should be 5–3600 seconds.', document.getElementById('recoverySecs'));
+
+    button.disabled = true;
+    const original = button.textContent;
+    button.textContent = 'Logging…';
+
+    const { error } = await db.from('heart_rate').insert({
+      name,
+      email,
+      resting_hr: resting,
+      active_hr: active,
+      recovery_seconds: recovery
+    });
+
+    button.disabled = false;
+    button.textContent = original;
+
+    if(error){
+      console.error(error);
+      fail('Something went wrong. Please try again.');
+      return;
+    }
+
+    sessionStorage.setItem('swimmers_email', email);
+
+    const drop = active - resting;
+    const mins = Math.floor(recovery / 60);
+    const secs = recovery % 60;
+    document.getElementById('dropNum').textContent = drop;
+    document.getElementById('dropTime').textContent =
+      (mins ? mins + 'm ' : '') + secs + 's';
+    // rough read on recovery speed: faster bounce-back = fitter heart
+    const bpmPerMin = drop / (recovery / 60);
+    document.getElementById('dropNote').textContent =
+      bpmPerMin >= 30 ? 'Elite bounce-back. Your heart is in great shape. 🏆' :
+      bpmPerMin >= 18 ? 'Solid recovery — better than most people your age. 💪' :
+      'Decent start — consistent cardio will speed this up. 🏃';
+
+    document.getElementById('hrCard').style.display = 'none';
+    document.getElementById('successBox').style.display = 'block';
+  });
+</script>
+
+</body>
+</html>

@@ -18,3 +18,27 @@ create policy "anyone can join the waitlist"
   for insert
   to anon
   with check (true);
+
+-- ---------------------------------------------------------------
+-- Heart check (heart.html): heart rate recovery entries
+-- ---------------------------------------------------------------
+
+create table if not exists public.heart_rate (
+  id               bigint generated always as identity primary key,
+  name             text not null,
+  email            text not null,
+  resting_hr       int  not null check (resting_hr between 30 and 120),
+  active_hr        int  not null check (active_hr between 60 and 230),
+  recovery_seconds int  not null check (recovery_seconds between 5 and 3600),
+  created_at       timestamptz not null default now()
+);
+
+alter table public.heart_rate enable row level security;
+
+-- Insert-only for the public anon key, same model as the waitlist:
+-- visitors can log an entry but cannot read, change, or delete any.
+create policy "anyone can log a heart check"
+  on public.heart_rate
+  for insert
+  to anon
+  with check (true);
