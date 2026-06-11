@@ -189,6 +189,24 @@
     margin-top:6px;
     box-shadow:inset 0 0 0 1px #cde8f8;
   }
+
+  /* ---- top-5 podium: wider row = higher rank ---- */
+  .lb-row{width:72%;margin-left:auto;margin-right:auto}
+  .lb-row.top-1{width:100%}
+  .lb-row.top-2{width:93%}
+  .lb-row.top-3{width:86%}
+  .lb-row.top-4{width:80%}
+  .lb-row.top-5{width:75%}
+  /* gold lettering for the top 5 */
+  .lb-row.top .lb-name,
+  .lb-row.top .lb-rank,
+  .lb-row.top .lb-score{
+    background:linear-gradient(180deg,#f9e497 0%,#e3b53e 45%,#b8860b 100%);
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;
+  }
+  .lb-row.top .lb-score small{background:none;-webkit-background-clip:initial;background-clip:initial;color:#c9a227}
+  a.lb-row.top:hover .lb-name{color:transparent}
   .lb-rank{
     font-weight:700;font-size:1rem;
     color:var(--ink-dim);text-align:center;
@@ -242,7 +260,8 @@
   .foot a:hover{color:var(--ink)}
 
   @media(max-width:560px){
-    .lb-row{grid-template-columns:34px 1fr 64px;gap:10px;padding:14px 16px}
+    .lb-row{grid-template-columns:34px 1fr 64px;gap:10px;padding:14px 16px;width:100%}
+    .lb-row.top-1,.lb-row.top-2,.lb-row.top-3,.lb-row.top-4,.lb-row.top-5{width:100%}
     .lb-bar{display:none}
     .foot{flex-direction:column;gap:10px}
   }
@@ -399,7 +418,7 @@
     }
 
     const rows = best.map((r, i) => `
-      <a class="lb-row" href="profile.html?u=${r.id}" data-name="${(r.name||'').toLowerCase()}">
+      <a class="lb-row ${i < 5 ? 'top top-' + (i + 1) : ''}" href="profile.html?u=${r.id}" data-name="${(r.name||'').toLowerCase()}">
         <div class="lb-rank ${i < 3 ? 'medal' : ''}">${MEDALS[i] || i + 1}</div>
         <div class="lb-who">
           <span class="lb-avatar" style="background:${COLORS[i % COLORS.length]};background-image:url('${portrait(r)}');background-size:cover;background-position:center"></span>
