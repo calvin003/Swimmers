@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>swimmers — fertility profile</title>
+<meta name="description" content="A Swimmers fertility profile.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#10202e;
+    --ink-dim:#5c7286;
+    --blue:#a9d3ea;        /* light blue (logo cross) */
+    --blue-deep:#2e7fb4;   /* secondary blue for contrast */
+    --blue-soft:#eaf4fa;
+    --border:#dfeaf2;
+    --radius:18px;
+    --good:#3aa372;
+    --warn:#d6a23c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Sora',sans-serif;line-height:1.15}
+
+  main{position:relative;z-index:1}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* ---- Nav ---- */
+  nav{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:28px 0;
+  }
+  .logo{
+    font-family:'Sora',sans-serif;font-weight:800;font-size:1.45rem;
+    letter-spacing:-.02em;color:var(--ink);
+    display:flex;align-items:center;gap:10px;
+    text-decoration:none;
+  }
+  .logo svg{display:block}
+  nav .cta-mini{
+    font-size:.9rem;font-weight:600;color:#fff;
+    background:var(--blue-deep);
+    padding:10px 22px;border-radius:99px;text-decoration:none;
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  nav .cta-mini:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(46,127,180,.35)}
+
+  .profile{
+    max-width:680px;margin:0 auto;
+    padding:20px 0 80px;
+    animation:rise .45s ease both;
+  }
+  @keyframes rise{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .back{
+    display:inline-block;margin-bottom:18px;
+    font-size:.9rem;font-weight:600;color:var(--blue-deep);text-decoration:none;
+  }
+  .back:hover{text-decoration:underline}
+
+  /* ---- Header card ---- */
+  .p-card{
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:0 10px 40px rgba(46,127,180,.08);
+    padding:26px 28px;
+    margin-bottom:22px;
+  }
+  .p-header{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .p-avatar{
+    width:72px;height:72px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Sora',sans-serif;font-weight:800;font-size:1.6rem;color:#fff;
+  }
+  .p-id{flex:1;min-width:180px}
+  .p-id h1{font-size:1.7rem;font-weight:800;letter-spacing:-.02em}
+  .p-id .meta{color:var(--ink-dim);font-size:.92rem}
+  .p-id .rank{
+    display:inline-block;margin-top:6px;
+    background:var(--blue-soft);border:1px solid var(--blue);
+    border-radius:99px;padding:3px 12px;
+    font-size:.78rem;font-weight:600;color:var(--blue-deep);
+  }
+  .p-score{text-align:center}
+  .p-score .ring{
+    --p:0;
+    width:104px;height:104px;border-radius:50%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:
+      radial-gradient(closest-side,#fff 78%,transparent 79% 100%),
+      conic-gradient(var(--blue-deep) calc(var(--p)*1%),var(--blue-soft) 0);
+  }
+  .p-score .num{font-family:'Sora',sans-serif;font-weight:800;font-size:1.7rem;color:var(--blue-deep);line-height:1}
+  .p-score .lbl{font-size:.65rem;color:#9db1c2;font-weight:500}
+  .p-trend{
+    margin-top:16px;padding-top:16px;border-top:1px solid var(--border);
+    font-size:.9rem;color:var(--ink-dim);
+  }
+  .p-trend b{color:var(--blue-deep)}
+
+  /* ---- Section heads ---- */
+  .sec-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin:26px 0 12px;padding:0 4px;
+  }
+  .sec-head h2{font-size:1.15rem;font-weight:800;letter-spacing:-.02em}
+  .sec-head span{font-size:.78rem;color:#9db1c2}
+
+  /* ---- Stats grid ---- */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .stat{
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 20px;
+  }
+  .stat .s-label{font-size:.78rem;font-weight:600;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.04em}
+  .stat .s-value{
+    font-family:'Sora',sans-serif;font-weight:800;font-size:1.7rem;color:var(--ink);
+    margin:2px 0 0;
+  }
+  .stat .s-value small{font-family:'Inter',sans-serif;font-weight:500;font-size:.78rem;color:#9db1c2;margin-left:4px}
+  .stat .s-bar{
+    height:8px;border-radius:99px;background:var(--blue-soft);
+    overflow:hidden;margin:10px 0 6px;
+  }
+  .stat .s-bar i{
+    display:block;height:100%;border-radius:99px;
+    background:linear-gradient(90deg,var(--blue),var(--blue-deep));
+    width:0;
+    transition:width .9s cubic-bezier(.22,.9,.35,1);
+  }
+  .stat .s-ref{font-size:.72rem;color:#9db1c2}
+
+  /* ---- Lifestyle ---- */
+  .life{
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .life-row{
+    display:flex;align-items:center;gap:14px;
+    padding:13px 20px;
+    border-bottom:1px solid var(--border);
+  }
+  .life-row:last-child{border-bottom:none}
+  .life-dot{
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.8rem;color:#fff;font-weight:700;
+  }
+  .life-dot.good{background:var(--good)}
+  .life-dot.warn{background:var(--warn)}
+  .life-row .l-label{font-weight:600;font-size:.92rem;width:120px;flex-shrink:0}
+  .life-row .l-note{font-size:.88rem;color:var(--ink-dim)}
+
+  /* ---- Badges ---- */
+  .badges{display:flex;flex-wrap:wrap;gap:10px}
+  .badge{
+    background:var(--blue-soft);
+    border:1px solid var(--blue);
+    border-radius:99px;
+    padding:7px 16px;
+    font-size:.85rem;font-weight:600;color:var(--blue-deep);
+  }
+
+  /* ---- CTA ---- */
+  .p-cta{
+    margin-top:30px;text-align:center;
+    background:var(--blue-soft);
+    border:1px solid var(--blue);
+    border-radius:var(--radius);
+    padding:26px 28px;
+  }
+  .p-cta h3{color:var(--blue-deep);font-size:1.15rem;margin-bottom:6px}
+  .p-cta p{color:var(--ink-dim);font-size:.92rem;margin-bottom:16px}
+  .p-cta a{
+    display:inline-block;
+    background:var(--blue-deep);color:#fff;
+    font-family:'Sora',sans-serif;font-weight:700;font-size:.95rem;
+    padding:13px 28px;border-radius:14px;text-decoration:none;
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  .p-cta a:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(46,127,180,.35)}
+
+  /* ---- Not found ---- */
+  .p-missing{display:none;text-align:center;padding:60px 0}
+  .p-missing h1{font-size:1.6rem;margin-bottom:8px}
+  .p-missing p{color:var(--ink-dim)}
+
+  footer{
+    border-top:1px solid var(--border);
+    padding:30px 0;
+    display:flex;justify-content:space-between;align-items:center;
+    color:#9db1c2;font-size:.85rem;
+  }
+  footer .logo{font-size:1rem}
+
+  @media(max-width:560px){
+    .stats{grid-template-columns:1fr}
+    .p-header{justify-content:center;text-align:center}
+    .life-row{flex-wrap:wrap}
+    footer{flex-direction:column;gap:12px}
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="wrap">
+
+    <nav>
+      <a class="logo" href="index.html">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#a9d3ea"/>
+        </svg>
+        swimmers
+      </a>
+      <a class="cta-mini" href="index.html#join">Join waitlist</a>
+    </nav>
+
+    <section class="profile" id="profileSection" style="display:none">
+      <a class="back" href="leaderboard.html">← Back to rankings</a>
+
+      <div class="p-card">
+        <div class="p-header">
+          <div class="p-avatar" id="pAvatar"></div>
+          <div class="p-id">
+            <h1 id="pName"></h1>
+            <div class="meta" id="pMeta"></div>
+            <span class="rank" id="pRank"></span>
+          </div>
+          <div class="p-score">
+            <div class="ring" id="pRing">
+              <span class="num" id="pScore"></span>
+              <span class="lbl">swim score</span>
+            </div>
+          </div>
+        </div>
+        <div class="p-trend" id="pTrend"></div>
+      </div>
+
+      <div class="sec-head">
+        <h2>Lab numbers</h2>
+        <span>vs WHO reference ranges</span>
+      </div>
+      <div class="stats" id="pStats"></div>
+
+      <div class="sec-head">
+        <h2>Lifestyle factors</h2>
+        <span>the stuff that moves the score</span>
+      </div>
+      <div class="life" id="pLife"></div>
+
+      <div class="sec-head">
+        <h2>Badges</h2>
+      </div>
+      <div class="badges" id="pBadges"></div>
+
+      <div class="p-cta">
+        <h3 id="pCtaTitle"></h3>
+        <p>Test from home at launch, get your own profile, and climb the board.</p>
+        <a href="index.html#join">Join the waitlist</a>
+      </div>
+    </section>
+
+    <section class="p-missing" id="missingSection">
+      <h1>No swimmer here yet 🏊</h1>
+      <p>This profile doesn't exist — maybe it's waiting for you to claim it.</p>
+      <p style="margin-top:18px"><a class="back" href="leaderboard.html">← Back to rankings</a></p>
+    </section>
+
+    <footer>
+      <a class="logo" href="index.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#a9d3ea"/>
+        </svg>
+        swimmers
+      </a>
+      <span>© 2026 Swimmers Health, Inc. Not medical advice.</span>
+    </footer>
+
+  </div>
+</main>
+
+<script src="swim-bg.js"></script>
+<script src="data.js"></script>
+<script>
+  const STAT_LABELS = {
+    motility:   'Motility',
+    count:      'Sperm count',
+    morphology: 'Morphology',
+    volume:     'Volume',
+    vitality:   'Vitality'
+  };
+
+  const slug = new URLSearchParams(location.search).get('u');
+  const idx = SWIMMERS_DATA.findIndex(s => s.slug === slug);
+  const p = SWIMMERS_DATA[idx];
+
+  if (!p) {
+    document.getElementById('missingSection').style.display = 'block';
+  } else {
+    document.title = 'swimmers — ' + p.name;
+    document.getElementById('profileSection').style.display = 'block';
+
+    const avatar = document.getElementById('pAvatar');
+    avatar.textContent = p.name[0];
+    avatar.style.background = p.color;
+
+    document.getElementById('pName').textContent = p.name;
+    document.getElementById('pMeta').textContent = p.age + ' · ' + p.tagline;
+    document.getElementById('pRank').textContent = '#' + (idx + 1) + ' on the swim rankings';
+    document.getElementById('pScore').textContent = p.score;
+    document.getElementById('pTrend').innerHTML = 'Trend: <b>' + p.trend + '</b>';
+
+    document.getElementById('pStats').innerHTML = Object.entries(p.stats).map(([key, s]) => `
+      <div class="stat">
+        <div class="s-label">${STAT_LABELS[key]}</div>
+        <div class="s-value">${s.value}<small>${s.unit}</small></div>
+        <div class="s-bar"><i data-width="${s.pct}"></i></div>
+        <div class="s-ref">${s.ref}</div>
+      </div>`).join('');
+
+    document.getElementById('pLife').innerHTML = p.lifestyle.map(l => `
+      <div class="life-row">
+        <span class="life-dot ${l.good ? 'good' : 'warn'}">${l.good ? '✓' : '!'}</span>
+        <span class="l-label">${l.label}</span>
+        <span class="l-note">${l.note}</span>
+      </div>`).join('');
+
+    document.getElementById('pBadges').innerHTML = p.badges.map(b =>
+      `<span class="badge">${b}</span>`).join('');
+
+    document.getElementById('pCtaTitle').textContent = 'Think you can beat ' + p.name.split(' ')[0] + '?';
+
+    // animate score ring + stat bars after first paint
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.getElementById('pRing').style.setProperty('--p', p.score);
+      document.querySelectorAll('.s-bar i').forEach(bar => {
+        bar.style.width = bar.dataset.width + '%';
+      });
+    }));
+  }
+</script>
+
+</body>
+</html>
