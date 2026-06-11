@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>swimmers — fertility profile</title>
+<meta name="description" content="A Swimmers fertility profile.">
+<meta name="theme-color" content="#7ddcfd">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-2:#5db8ef;
+    --sky-3:#3a97da;
+    --ink:#16242f;
+    --ink-dim:#6b7d8c;
+    --panel:#f4f6f8;
+    --border:#e7ecf0;
+    --good:#3aa372;
+    --warn:#d6a23c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    background:#fff;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  .serif{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:-.01em}
+
+  /* ---- sky band ---- */
+  .sky-band{
+    position:relative;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 120% at 50% -20%, #cdeeff 0%, transparent 55%),
+      linear-gradient(180deg, var(--sky-2) 0%, var(--sky-3) 55%, #6fc2ef 100%);
+    padding-bottom:110px;
+  }
+  .sky-band::before{
+    content:"";
+    position:absolute;inset:0;
+    background:linear-gradient(115deg, transparent 38%, rgba(255,255,255,.14) 46%, transparent 54%);
+    pointer-events:none;
+  }
+  .cloud{
+    position:absolute;
+    background:radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,0));
+    border-radius:50%;
+    filter:blur(6px);
+    pointer-events:none;
+    animation:cloud-drift linear infinite;
+  }
+  @keyframes cloud-drift{from{transform:translateX(-12vw)}to{transform:translateX(112vw)}}
+
+  .wrap{position:relative;z-index:2;max-width:1140px;margin:0 auto;padding:0 24px}
+
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:30px 0 26px;
+  }
+  .logo{
+    display:flex;align-items:center;gap:10px;
+    color:#fff;font-weight:700;font-size:1.25rem;letter-spacing:-.02em;
+    text-shadow:0 1px 8px rgba(30,90,140,.35);
+    text-decoration:none;
+  }
+  .logo svg{filter:drop-shadow(0 1px 4px rgba(30,90,140,.35))}
+
+  .gel{
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:'Inter',sans-serif;font-weight:600;
+    color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.55);
+    background:linear-gradient(180deg,#b4e2f7 0%,#5fb0dd 35%,#3585bd 78%,#4a9fd2 100%);
+    box-shadow:
+      inset 0 2px 3px rgba(255,255,255,.75),
+      inset 0 -4px 8px rgba(10,60,100,.28),
+      0 8px 20px rgba(20,80,130,.35);
+    text-shadow:0 1px 2px rgba(10,60,100,.45);
+    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .gel:hover{transform:translateY(-2px);filter:brightness(1.06)}
+  .gel:active{transform:translateY(1px);filter:brightness(.97)}
+  .gel.small{padding:10px 24px;font-size:.92rem}
+
+  /* ---- profile ---- */
+  .profile{
+    max-width:680px;margin:-80px auto 0;
+    position:relative;z-index:3;
+    padding:0 24px 90px;
+    animation:rise .45s ease both;
+  }
+  @keyframes rise{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .back{
+    display:inline-block;margin-bottom:16px;
+    font-size:.92rem;font-weight:600;color:#fff;text-decoration:none;
+    text-shadow:0 1px 6px rgba(30,90,140,.5);
+  }
+  .back:hover{text-decoration:underline}
+
+  /* ---- Header card ---- */
+  .p-card{
+    background:rgba(255,255,255,.96);
+    border:1px solid rgba(255,255,255,.9);
+    border-radius:22px;
+    box-shadow:0 18px 50px rgba(20,80,130,.25);
+    backdrop-filter:blur(8px);
+    padding:28px 30px;
+    margin-bottom:22px;
+  }
+  .p-header{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .p-avatar{
+    width:72px;height:72px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:1.6rem;color:#fff;
+    border:2px solid rgba(255,255,255,.6);
+    box-shadow:inset 0 2px 4px rgba(255,255,255,.5), inset 0 -4px 8px rgba(10,60,100,.25), 0 6px 16px rgba(20,80,130,.25);
+    text-shadow:0 1px 3px rgba(10,60,100,.35);
+  }
+  .p-id{flex:1;min-width:180px}
+  .p-id h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:2.2rem;letter-spacing:-.01em;line-height:1.1}
+  .p-id .meta{color:var(--ink-dim);font-size:.92rem}
+  .p-id .rank{
+    display:inline-block;margin-top:8px;
+    font-size:.8rem;font-weight:700;color:#fff;
+    border-radius:999px;padding:5px 14px;
+    border:1px solid rgba(255,255,255,.5);
+    background:linear-gradient(180deg,#b4e2f7 0%,#5fb0dd 40%,#3585bd 100%);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.7), inset 0 -2px 5px rgba(10,60,100,.25), 0 4px 10px rgba(20,80,130,.25);
+    text-shadow:0 1px 2px rgba(10,60,100,.4);
+  }
+  .p-score{text-align:center}
+  .p-score .ring{
+    --p:0;
+    width:104px;height:104px;border-radius:50%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:
+      radial-gradient(closest-side,#fff 78%,transparent 79% 100%),
+      conic-gradient(var(--sky-3) calc(var(--p)*1%),var(--panel) 0);
+    box-shadow:0 6px 16px rgba(20,80,130,.15);
+  }
+  .p-score .num{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:2rem;color:var(--sky-3);line-height:1}
+  .p-score .lbl{font-size:.65rem;color:#9bb0c0;font-weight:500}
+  .p-trend{
+    margin-top:16px;padding-top:16px;border-top:1px solid var(--border);
+    font-size:.9rem;color:var(--ink-dim);
+  }
+  .p-trend b{color:var(--sky-3)}
+
+  /* ---- Section heads ---- */
+  .sec-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin:28px 0 12px;padding:0 6px;
+  }
+  .sec-head h2{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:1.6rem;letter-spacing:-.01em}
+  .sec-head span{font-size:.78rem;color:#9bb0c0}
+
+  /* ---- Stats grid ---- */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .stat{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px 20px;
+    box-shadow:0 8px 24px rgba(30,90,140,.06);
+  }
+  .stat .s-label{font-size:.76rem;font-weight:600;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.04em}
+  .stat .s-value{
+    font-weight:700;font-size:1.7rem;color:var(--ink);letter-spacing:-.02em;
+    margin:2px 0 0;
+  }
+  .stat .s-value small{font-weight:500;font-size:.78rem;color:#9bb0c0;margin-left:4px}
+  .stat .s-bar{
+    height:9px;border-radius:99px;background:var(--panel);
+    border:1px solid var(--border);
+    overflow:hidden;margin:10px 0 6px;
+  }
+  .stat .s-bar i{
+    display:block;height:100%;border-radius:99px;
+    background:linear-gradient(180deg,#9fd5f2 0%,#5fb0dd 50%,#3585bd 100%);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.6);
+    width:0;
+    transition:width .9s cubic-bezier(.22,.9,.35,1);
+  }
+  .stat .s-ref{font-size:.72rem;color:#9bb0c0}
+
+  /* ---- Lifestyle ---- */
+  .life{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 8px 24px rgba(30,90,140,.06);
+  }
+  .life-row{
+    display:flex;align-items:center;gap:14px;
+    padding:13px 20px;
+    border-bottom:1px solid var(--border);
+  }
+  .life-row:last-child{border-bottom:none}
+  .life-dot{
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.8rem;color:#fff;font-weight:700;
+    border:1px solid rgba(255,255,255,.5);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.5), inset 0 -2px 4px rgba(0,0,0,.15);
+  }
+  .life-dot.good{background:linear-gradient(180deg,#6cc99c,#2f9265)}
+  .life-dot.warn{background:linear-gradient(180deg,#e9c272,#c29130)}
+  .life-row .l-label{font-weight:600;font-size:.92rem;width:120px;flex-shrink:0}
+  .life-row .l-note{font-size:.88rem;color:var(--ink-dim)}
+
+  /* ---- Badges ---- */
+  .badges{display:flex;flex-wrap:wrap;gap:10px}
+  .badge{
+    font-size:.85rem;font-weight:700;color:#fff;
+    border-radius:999px;padding:7px 18px;
+    border:1px solid rgba(255,255,255,.5);
+    background:linear-gradient(180deg,#b4e2f7 0%,#5fb0dd 40%,#3585bd 100%);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.7), inset 0 -2px 5px rgba(10,60,100,.25), 0 4px 10px rgba(20,80,130,.2);
+    text-shadow:0 1px 2px rgba(10,60,100,.4);
+  }
+
+  /* ---- CTA ---- */
+  .p-cta{
+    margin-top:34px;text-align:center;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:34px 28px;
+  }
+  .p-cta h3{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:1.9rem;margin-bottom:6px}
+  .p-cta p{color:var(--ink-dim);font-size:.95rem;margin-bottom:20px}
+  .p-cta a{
+    display:inline-flex;align-items:center;justify-content:center;
+    font-weight:600;font-size:1rem;color:#fff;text-decoration:none;
+    border-radius:999px;padding:14px 32px;
+    border:1px solid rgba(255,255,255,.55);
+    background:linear-gradient(180deg,#b4e2f7 0%,#5fb0dd 35%,#3585bd 78%,#4a9fd2 100%);
+    box-shadow:inset 0 2px 3px rgba(255,255,255,.75), inset 0 -4px 8px rgba(10,60,100,.28), 0 8px 20px rgba(20,80,130,.35);
+    text-shadow:0 1px 2px rgba(10,60,100,.45);
+    transition:transform .15s ease, filter .15s ease;
+  }
+  .p-cta a:hover{transform:translateY(-2px);filter:brightness(1.06)}
+
+  /* ---- Not found ---- */
+  .p-missing{display:none;text-align:center;padding:80px 24px;position:relative;z-index:3;margin-top:-80px}
+  .p-missing h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:2.4rem;margin-bottom:8px;color:#fff;text-shadow:0 2px 14px rgba(30,90,140,.5)}
+  .p-missing p{color:rgba(255,255,255,.92);text-shadow:0 1px 8px rgba(30,90,140,.4)}
+  .p-missing .back{margin-top:18px}
+
+  footer{
+    background:var(--panel);
+    border-top:1px solid var(--border);
+    padding:26px 24px;
+  }
+  .foot{
+    max-width:1140px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:center;
+    color:var(--ink-dim);font-size:.88rem;
+  }
+  .foot a{color:var(--ink-dim);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600}
+  .foot a:hover{color:var(--ink)}
+
+  @media(max-width:560px){
+    .stats{grid-template-columns:1fr}
+    .p-header{justify-content:center;text-align:center}
+    .life-row{flex-wrap:wrap}
+    .foot{flex-direction:column;gap:10px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .cloud{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="sky-band">
+  <div id="sky" aria-hidden="true"></div>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="index.html">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#ffffff" opacity=".95"/>
+        </svg>
+        swimmers
+      </a>
+      <a class="gel small" href="index.html#join">Join waitlist</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="profile" id="profileSection" style="display:none">
+    <a class="back" href="leaderboard.html">← Back to rankings</a>
+
+    <div class="p-card">
+      <div class="p-header">
+        <div class="p-avatar" id="pAvatar"></div>
+        <div class="p-id">
+          <h1 id="pName"></h1>
+          <div class="meta" id="pMeta"></div>
+          <span class="rank" id="pRank"></span>
+        </div>
+        <div class="p-score">
+          <div class="ring" id="pRing">
+            <span class="num" id="pScore"></span>
+            <span class="lbl">swim score</span>
+          </div>
+        </div>
+      </div>
+      <div class="p-trend" id="pTrend"></div>
+    </div>
+
+    <div class="sec-head">
+      <h2 class="serif">Lab numbers</h2>
+      <span>vs WHO reference ranges</span>
+    </div>
+    <div class="stats" id="pStats"></div>
+
+    <div class="sec-head">
+      <h2 class="serif">Lifestyle factors</h2>
+      <span>the stuff that moves the score</span>
+    </div>
+    <div class="life" id="pLife"></div>
+
+    <div class="sec-head">
+      <h2 class="serif">Badges</h2>
+    </div>
+    <div class="badges" id="pBadges"></div>
+
+    <div class="p-cta">
+      <h3 id="pCtaTitle"></h3>
+      <p>Test from home at launch, get your own profile, and climb the board.</p>
+      <a href="index.html#join">Join the waitlist</a>
+    </div>
+  </section>
+
+  <section class="p-missing" id="missingSection">
+    <h1 class="serif">No swimmer here yet 🏊</h1>
+    <p>This profile doesn't exist — maybe it's waiting for you to claim it.</p>
+    <p style="margin-top:18px"><a class="back" href="leaderboard.html">← Back to rankings</a></p>
+  </section>
+</main>
+
+<footer>
+  <div class="foot">
+    <a href="index.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#a9d3ea"/>
+      </svg>
+      swimmers
+    </a>
+    <span>© 2026 Swimmers Health, Inc. Not medical advice.</span>
+  </div>
+</footer>
+
+<script>
+  /* ---------- sky clouds ---------- */
+  (function(){
+    var sky = document.getElementById('sky');
+    for(var i=0;i<5;i++){
+      var c = document.createElement('div');
+      c.className = 'cloud';
+      var w = 160 + Math.random()*280;
+      c.style.width = w+'px';
+      c.style.height = (w*0.36)+'px';
+      c.style.top = (5 + Math.random()*65)+'%';
+      c.style.left = (Math.random()*100)+'%';
+      c.style.opacity = .25 + Math.random()*.45;
+      c.style.animationDuration = (60 + Math.random()*90)+'s';
+      c.style.animationDelay = (-Math.random()*120)+'s';
+      sky.appendChild(c);
+    }
+  })();
+</script>
+<script src="data.js"></script>
+<script>
+  const STAT_LABELS = {
+    motility:   'Motility',
+    count:      'Sperm count',
+    morphology: 'Morphology',
+    volume:     'Volume',
+    vitality:   'Vitality'
+  };
+
+  const slug = new URLSearchParams(location.search).get('u');
+  const idx = SWIMMERS_DATA.findIndex(s => s.slug === slug);
+  const p = SWIMMERS_DATA[idx];
+
+  if (!p) {
+    document.getElementById('missingSection').style.display = 'block';
+  } else {
+    document.title = 'swimmers — ' + p.name;
+    document.getElementById('profileSection').style.display = 'block';
+
+    const avatar = document.getElementById('pAvatar');
+    avatar.textContent = p.name[0];
+    avatar.style.background = p.color;
+
+    document.getElementById('pName').textContent = p.name;
+    document.getElementById('pMeta').textContent = p.age + ' · ' + p.tagline;
+    document.getElementById('pRank').textContent = '#' + (idx + 1) + ' on the swim rankings';
+    document.getElementById('pScore').textContent = p.score;
+    document.getElementById('pTrend').innerHTML = 'Trend: <b>' + p.trend + '</b>';
+
+    document.getElementById('pStats').innerHTML = Object.entries(p.stats).map(([key, s]) => `
+      <div class="stat">
+        <div class="s-label">${STAT_LABELS[key]}</div>
+        <div class="s-value">${s.value}<small>${s.unit}</small></div>
+        <div class="s-bar"><i data-width="${s.pct}"></i></div>
+        <div class="s-ref">${s.ref}</div>
+      </div>`).join('');
+
+    document.getElementById('pLife').innerHTML = p.lifestyle.map(l => `
+      <div class="life-row">
+        <span class="life-dot ${l.good ? 'good' : 'warn'}">${l.good ? '✓' : '!'}</span>
+        <span class="l-label">${l.label}</span>
+        <span class="l-note">${l.note}</span>
+      </div>`).join('');
+
+    document.getElementById('pBadges').innerHTML = p.badges.map(b =>
+      `<span class="badge">${b}</span>`).join('');
+
+    document.getElementById('pCtaTitle').textContent = 'Think you can beat ' + p.name.split(' ')[0] + '?';
+
+    // animate score ring + stat bars after first paint
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.getElementById('pRing').style.setProperty('--p', p.score);
+      document.querySelectorAll('.s-bar i').forEach(bar => {
+        bar.style.width = bar.dataset.width + '%';
+      });
+    }));
+  }
+</script>
+
+</body>
+</html>
