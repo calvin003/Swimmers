@@ -106,6 +106,28 @@
   }
   .back:hover{text-decoration:underline}
 
+  /* ---- Giant rank hero ---- */
+  .rank-hero{
+    text-align:center;
+    margin:6px 0 30px;
+    color:#fff;
+    text-shadow:0 4px 22px rgba(15,70,120,.5);
+    animation:rise .45s ease both;
+  }
+  .rank-hero .rank-num{
+    display:block;
+    font-family:'Instrument Serif',Georgia,serif;font-weight:400;
+    font-size:clamp(5rem,22vw,11rem);
+    line-height:.9;letter-spacing:-.04em;
+  }
+  .rank-hero .rank-sub{
+    display:block;margin-top:6px;
+    font-family:'Instrument Serif',Georgia,serif;
+    font-size:clamp(1.5rem,6vw,2.7rem);
+    line-height:1.12;
+  }
+  .rank-hero .rank-org{font-weight:600;border-bottom:2px solid rgba(255,255,255,.45)}
+
   /* ---- Header card ---- */
   .p-card{
     background:rgba(255,255,255,.96);
@@ -302,6 +324,8 @@
   <section class="profile" id="profileSection" style="display:none">
     <a class="back" href="leaderboard.html">← Back to rankings</a>
 
+    <div class="rank-hero" id="rankHero"></div>
+
     <div class="p-card">
       <div class="p-header">
         <div class="p-avatar" id="pAvatar"></div>
@@ -396,6 +420,11 @@
     return (m ? m + 'm ' : '') + s + 's';
   }
 
+  function ordinal(n){
+    const s = ['th','st','nd','rd'], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
   async function loadProfile(){
     const id = parseInt(new URLSearchParams(location.search).get('u'), 10);
 
@@ -431,10 +460,32 @@
 
     const avatar = document.getElementById('pAvatar');
     avatar.style.background = COLORS[(rankIdx >= 0 ? rankIdx : 0) % COLORS.length];
-    // deterministic placeholder headshot (licensed fake-people photos)
-    avatar.style.backgroundImage = `url('https://randomuser.me/api/portraits/men/${p.id % 99}.jpg')`;
+    // uploaded profile photo (backend, or saved locally on heart check),
+    // falling back to a deterministic placeholder headshot
+    const uploaded = p.avatar_url
+      || localStorage.getItem('swimmers_avatar:' + (p.email || '').toLowerCase())
+      || localStorage.getItem('swimmers_avatar:' + (p.name || '').trim().toLowerCase());
+    avatar.style.backgroundImage = `url('${uploaded || `https://randomuser.me/api/portraits/men/${p.id % 99}.jpg`}')`;
     avatar.style.backgroundSize = 'cover';
     avatar.style.backgroundPosition = 'center';
+
+    // --- Giant rank hero: "{ordinal} healthiest @ {origin}" ---
+    // ranked within the swimmer's own origin; falls back to overall rank.
+    const myOrigin = (p.origin || '').trim();
+    let heroRank, heroOrigin;
+    if (myOrigin) {
+      const sameOrigin = best.filter(r => (r.origin || '').trim().toLowerCase() === myOrigin.toLowerCase());
+      const idx = sameOrigin.findIndex(r => (r.name || '').trim().toLowerCase() === (p.name || '').trim().toLowerCase());
+      heroRank = idx >= 0 ? idx + 1 : null;
+      heroOrigin = myOrigin;
+    } else {
+      heroRank = rankIdx >= 0 ? rankIdx + 1 : null;
+      heroOrigin = null;
+    }
+    document.getElementById('rankHero').innerHTML = heroRank
+      ? `<span class="rank-num">${ordinal(heroRank)}</span>` +
+        `<span class="rank-sub">healthiest${heroOrigin ? ' @ <span class="rank-org">' + heroOrigin + '</span>' : ' overall'}</span>`
+      : '';
 
     document.getElementById('pName').textContent = p.name;
     document.getElementById('pMeta').textContent =

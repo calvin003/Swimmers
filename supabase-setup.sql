@@ -47,3 +47,6 @@ create policy "anyone can log a heart check"
 alter table public.heart_rate
   add column if not exists spo2 int check (spo2 between 70 and 100),
   add column if not exists ecg_reading text;
+
+-- origin: where the participant was sourced (e.g. Stanford, SF)
+alter table public.heart_rate add column if not exists origin text;

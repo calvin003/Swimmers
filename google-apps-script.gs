@@ -19,9 +19,9 @@ var ROUTES = {
   },
   heart_rate: {
     sheet: 'HeartChecks',
-    headers: ['id', 'name', 'email', 'resting_hr', 'active_hr', 'recovery_seconds', 'spo2', 'ecg_reading', 'created_at', 'received_at'],
+    headers: ['id', 'name', 'origin', 'email', 'resting_hr', 'active_hr', 'recovery_seconds', 'spo2', 'ecg_reading', 'created_at', 'received_at'],
     row: function (r) {
-      return [r.id || '', r.name || '', r.email || '', r.resting_hr || '', r.active_hr || '', r.recovery_seconds || '', r.spo2 || '', r.ecg_reading || '', r.created_at || '', new Date()];
+      return [r.id || '', r.name || '', r.origin || '', r.email || '', r.resting_hr || '', r.active_hr || '', r.recovery_seconds || '', r.spo2 || '', r.ecg_reading || '', r.created_at || '', new Date()];
     }
   }
 };

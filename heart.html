@@ -145,6 +145,27 @@
   }
   .field input::placeholder{color:#9bb0c0}
   .field input:focus{border-color:var(--sky-3);background:#fff;box-shadow:0 0 0 4px rgba(125,220,253,.35)}
+
+  /* ---- avatar picker ---- */
+  .avatar-field{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+  .avatar-pick{
+    width:72px;height:72px;border-radius:50%;flex-shrink:0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--panel) center/cover no-repeat;
+    border:2px dashed #b9cad6;
+    color:#9bb0c0;
+    transition:border-color .15s ease,box-shadow .15s ease;
+  }
+  .avatar-pick:hover,.avatar-pick:focus-visible{border-color:var(--sky-3);box-shadow:0 0 0 4px rgba(125,220,253,.35);outline:none}
+  .avatar-pick.has-img{border-style:solid;border-color:rgba(255,255,255,.6);box-shadow:0 6px 16px rgba(20,80,130,.25)}
+  .avatar-pick.has-img svg{display:none}
+  .avatar-meta label{display:block;font-size:.82rem;font-weight:600;color:var(--ink-dim)}
+  .avatar-meta .hint{font-weight:400;color:#9bb0c0;font-size:.8rem}
+  .avatar-meta .remove{
+    display:none;margin-top:4px;
+    background:none;border:none;padding:0;cursor:pointer;
+    font-size:.8rem;font-weight:600;color:#d65454;font-family:inherit;
+  }
   .field select{
     width:100%;
     background:var(--panel);
@@ -252,6 +273,20 @@
   <section class="heart">
     <div class="hr-card" id="hrCard">
       <form id="hrForm" novalidate>
+        <div class="avatar-field">
+          <div class="avatar-pick" id="avatarPick" role="button" tabindex="0" aria-label="Add a profile photo">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+          <div class="avatar-meta">
+            <label for="avatarFile">Profile photo <span class="hint">(optional)</span></label>
+            <span class="hint">Shows on your fertility profile and the swim rankings.</span>
+            <button type="button" class="remove" id="avatarRemove">Remove photo</button>
+          </div>
+          <input type="file" id="avatarFile" accept="image/*" hidden>
+        </div>
         <div class="two-col">
           <div class="field">
             <label for="name">Name</label>
@@ -261,6 +296,10 @@
             <label for="email">Email</label>
             <input type="email" id="email" placeholder="you@school.edu" autocomplete="email" required>
           </div>
+        </div>
+        <div class="field">
+          <label for="origin">Origin <span class="hint">(where we sourced you — e.g. Stanford, SF)</span></label>
+          <input type="text" id="origin" placeholder="e.g. Stanford" autocomplete="organization">
         </div>
         <div class="two-col">
           <div class="field">
@@ -360,6 +399,64 @@
     if(el) el.focus();
   }
 
+  /* ---------- profile photo ---------- */
+  const avatarPick = document.getElementById('avatarPick');
+  const avatarFile = document.getElementById('avatarFile');
+  const avatarRemove = document.getElementById('avatarRemove');
+  let avatarData = null; // small JPEG data URL
+
+  // restore a previously chosen photo for this email
+  if(savedEmail){
+    const prev = localStorage.getItem('swimmers_avatar:' + savedEmail);
+    if(prev) setAvatar(prev);
+  }
+
+  function setAvatar(dataUrl){
+    avatarData = dataUrl;
+    avatarPick.classList.add('has-img');
+    avatarPick.style.backgroundImage = `url('${dataUrl}')`;
+    avatarRemove.style.display = 'inline';
+  }
+
+  function clearAvatar(){
+    avatarData = null;
+    avatarPick.classList.remove('has-img');
+    avatarPick.style.backgroundImage = '';
+    avatarRemove.style.display = 'none';
+    avatarFile.value = '';
+  }
+
+  avatarPick.addEventListener('click', () => avatarFile.click());
+  avatarPick.addEventListener('keydown', e => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); avatarFile.click(); }
+  });
+  avatarRemove.addEventListener('click', clearAvatar);
+
+  avatarFile.addEventListener('change', () => {
+    const file = avatarFile.files[0];
+    if(!file) return;
+    if(!file.type.startsWith('image/')) return fail('Please choose an image file.');
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(img.src);
+      // center-crop to a 192px square and compress
+      const SIZE = 192;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = SIZE;
+      const side = Math.min(img.width, img.height);
+      canvas.getContext('2d').drawImage(
+        img,
+        (img.width - side) / 2, (img.height - side) / 2, side, side,
+        0, 0, SIZE, SIZE
+      );
+      setAvatar(canvas.toDataURL('image/jpeg', .82));
+      msg.className = 'form-msg';
+      msg.textContent = '';
+    };
+    img.onerror = () => fail('Could not read that image — try another one.');
+    img.src = URL.createObjectURL(file);
+  });
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
     msg.className = 'form-msg';
@@ -371,6 +468,7 @@
     const recovery = parseInt(document.getElementById('recoverySecs').value, 10);
     const spo2 = parseInt(document.getElementById('spo2').value, 10);
     const ecg = document.getElementById('ecgReading').value;
+    const origin = document.getElementById('origin').value.trim();
 
     if(!name) return fail('Please enter your name.', document.getElementById('name'));
     if(!EMAIL_RE.test(email)) return fail('Please enter a valid email address.', document.getElementById('email'));
@@ -385,15 +483,25 @@
     const original = button.textContent;
     button.textContent = 'Logging…';
 
-    const { error } = await db.from('heart_rate').insert({
+    const row = {
       name,
       email,
       resting_hr: resting,
       active_hr: active,
       recovery_seconds: recovery,
       spo2: spo2,
-      ecg_reading: ecg
-    });
+      ecg_reading: ecg,
+      origin: origin || null
+    };
+    if(avatarData) row.avatar_url = avatarData;
+
+    let { error } = await db.from('heart_rate').insert(row);
+
+    // backend may not have the avatar_url column yet — retry without it
+    if(error && avatarData && /avatar_url/.test(error.message || '')){
+      delete row.avatar_url;
+      ({ error } = await db.from('heart_rate').insert(row));
+    }
 
     button.disabled = false;
     button.textContent = original;
@@ -405,6 +513,14 @@
     }
 
     sessionStorage.setItem('swimmers_email', email);
+
+    // keep the photo locally so the profile & rankings can show it on this device
+    if(avatarData){
+      try{
+        localStorage.setItem('swimmers_avatar:' + email, avatarData);
+        localStorage.setItem('swimmers_avatar:' + name.toLowerCase(), avatarData);
+      }catch(_){ /* storage full — backend copy still applies */ }
+    }
 
     const drop = active - resting;
     const mins = Math.floor(recovery / 60);
