@@ -42,3 +42,8 @@ create policy "anyone can log a heart check"
   for insert
   to anon
   with check (true);
+
+-- SpO2 + ECG readings added to heart checks (already applied in the dashboard)
+alter table public.heart_rate
+  add column if not exists spo2 int check (spo2 between 70 and 100),
+  add column if not exists ecg_reading text;

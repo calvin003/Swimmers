@@ -145,6 +145,24 @@
   }
   .field input::placeholder{color:#9bb0c0}
   .field input:focus{border-color:var(--sky-3);background:#fff;box-shadow:0 0 0 4px rgba(125,220,253,.35)}
+  .field select{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:14px 16px;
+    color:var(--ink);
+    font-size:1rem;font-family:inherit;
+    outline:none;
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b7d8c' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 16px center;
+    transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease;
+  }
+  .field select:focus{border-color:var(--sky-3);background-color:#fff;box-shadow:0 0 0 4px rgba(125,220,253,.35)}
+  .field select:invalid{color:#9bb0c0}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 
   .hr-card button{
@@ -258,6 +276,23 @@
           <label for="recoverySecs">Recovery time <span class="hint">(seconds from active back to resting)</span></label>
           <input type="number" id="recoverySecs" placeholder="e.g. 120" min="5" max="3600" inputmode="numeric" required>
         </div>
+        <div class="two-col">
+          <div class="field">
+            <label for="spo2">SpO2 reading <span class="hint">(%, blood oxygen)</span></label>
+            <input type="number" id="spo2" placeholder="e.g. 98" min="70" max="100" inputmode="numeric" required>
+          </div>
+          <div class="field">
+            <label for="ecgReading">ECG reading <span class="hint">(from your watch/monitor)</span></label>
+            <select id="ecgReading" required>
+              <option value="" disabled selected>Select result…</option>
+              <option>Sinus rhythm</option>
+              <option>Atrial fibrillation</option>
+              <option>Low heart rate</option>
+              <option>High heart rate</option>
+              <option>Inconclusive</option>
+            </select>
+          </div>
+        </div>
         <button type="submit">Log my heart check</button>
         <p class="form-msg" id="formMsg" role="status"></p>
       </form>
@@ -334,6 +369,8 @@
     const resting = parseInt(document.getElementById('restingHr').value, 10);
     const active = parseInt(document.getElementById('activeHr').value, 10);
     const recovery = parseInt(document.getElementById('recoverySecs').value, 10);
+    const spo2 = parseInt(document.getElementById('spo2').value, 10);
+    const ecg = document.getElementById('ecgReading').value;
 
     if(!name) return fail('Please enter your name.', document.getElementById('name'));
     if(!EMAIL_RE.test(email)) return fail('Please enter a valid email address.', document.getElementById('email'));
@@ -341,6 +378,8 @@
     if(!(active >= 60 && active <= 230)) return fail('Active heart rate should be 60–230 bpm.', document.getElementById('activeHr'));
     if(active <= resting) return fail('Active heart rate should be higher than resting.', document.getElementById('activeHr'));
     if(!(recovery >= 5 && recovery <= 3600)) return fail('Recovery time should be 5–3600 seconds.', document.getElementById('recoverySecs'));
+    if(!(spo2 >= 70 && spo2 <= 100)) return fail('SpO2 should be 70–100%.', document.getElementById('spo2'));
+    if(!ecg) return fail('Please select your ECG reading.', document.getElementById('ecgReading'));
 
     button.disabled = true;
     const original = button.textContent;
@@ -351,7 +390,9 @@
       email,
       resting_hr: resting,
       active_hr: active,
-      recovery_seconds: recovery
+      recovery_seconds: recovery,
+      spo2: spo2,
+      ecg_reading: ecg
     });
 
     button.disabled = false;
