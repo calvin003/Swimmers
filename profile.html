@@ -332,7 +332,6 @@
         <div class="p-id">
           <h1 id="pName"></h1>
           <div class="meta" id="pMeta"></div>
-          <span class="rank" id="pRank"></span>
         </div>
         <div class="p-score">
           <div class="ring" id="pRing">
@@ -341,25 +340,18 @@
           </div>
         </div>
       </div>
-      <div class="p-trend" id="pTrend"></div>
     </div>
+
+    <div class="sec-head">
+      <h2 class="serif">Badges</h2>
+    </div>
+    <div class="badges" id="pBadges"></div>
 
     <div class="sec-head">
       <h2 class="serif">Heart metrics</h2>
       <span>from your latest heart check</span>
     </div>
     <div class="stats" id="pStats"></div>
-
-    <div class="sec-head">
-      <h2 class="serif">Score breakdown</h2>
-      <span>swim score = resting ×.40 + active ×.30 + recovery ×.20 + SpO2 ×.10</span>
-    </div>
-    <div class="life" id="pLife"></div>
-
-    <div class="sec-head">
-      <h2 class="serif">Badges</h2>
-    </div>
-    <div class="badges" id="pBadges"></div>
 
     <div class="p-cta">
       <h3 id="pCtaTitle"></h3>
@@ -414,6 +406,8 @@
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const COLORS = ['#3585bd','#5fb0dd','#7bbede','#2e6f9e','#4a9fd2','#6cb5de','#35648d','#58a7d6'];
+  // curated college-age headshots (hand-picked young faces), same pool as the leaderboard
+  const YOUNG_FACES = [1,3,4,10,14,15,17,18,26,27,30,35,37,42,43,46,47,51,52,56,57,60,61,62,64,65,67,70,73,77,78,84,85,86,87,88,89,90,92,93,95,96,97,98];
 
   function fmtRecovery(secs){
     const m = Math.floor(secs / 60), s = secs % 60;
@@ -465,7 +459,7 @@
     const uploaded = p.avatar_url
       || localStorage.getItem('swimmers_avatar:' + (p.email || '').toLowerCase())
       || localStorage.getItem('swimmers_avatar:' + (p.name || '').trim().toLowerCase());
-    avatar.style.backgroundImage = `url('${uploaded || `https://randomuser.me/api/portraits/men/${p.id % 99}.jpg`}')`;
+    avatar.style.backgroundImage = `url('${uploaded || `https://randomuser.me/api/portraits/men/${YOUNG_FACES[p.id % YOUNG_FACES.length]}.jpg`}')`;
     avatar.style.backgroundSize = 'cover';
     avatar.style.backgroundPosition = 'center';
 
@@ -492,12 +486,7 @@
       (p.origin ? p.origin + ' · ' : '') +
       'Heart check ' + new Date(p.created_at).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'}) +
       ' · ECG: ' + (p.ecg_reading || 'not logged');
-    document.getElementById('pRank').textContent =
-      rankIdx >= 0 ? '#' + (rankIdx + 1) + ' on the swim rankings' : 'on the swim rankings';
     document.getElementById('pScore').textContent = p.swim_score;
-    document.getElementById('pTrend').innerHTML =
-      'Swim score: <b>' + p.swim_score + '</b> — resting ' + p.resting_score + ' ×.40 + active ' +
-      p.active_score + ' ×.30 + recovery ' + p.recovery_score + ' ×.20 + SpO2 ' + p.spo2_score + ' ×.10';
 
     const METRICS = [
       { label: 'Resting heart rate', value: p.resting_hr, unit: 'bpm',  pct: p.resting_score,  ref: 'score ' + p.resting_score + '/100 · weight 40%' },
@@ -511,19 +500,6 @@
         <div class="s-value">${m.value}<small>${m.unit}</small></div>
         <div class="s-bar"><i data-width="${m.pct}"></i></div>
         <div class="s-ref">${m.ref}</div>
-      </div>`).join('');
-
-    const PARTS = [
-      { label: 'Resting ×.40',  pts: Math.round(p.resting_score * 0.40 * 10) / 10, good: p.resting_score >= 50, note: p.resting_score + '/100 → ' + (Math.round(p.resting_score * 0.40 * 10) / 10) + ' pts toward your score' },
-      { label: 'Active ×.30',   pts: Math.round(p.active_score * 0.30 * 10) / 10, good: p.active_score >= 50, note: p.active_score + '/100 → ' + (Math.round(p.active_score * 0.30 * 10) / 10) + ' pts toward your score' },
-      { label: 'Recovery ×.20', pts: Math.round(p.recovery_score * 0.20 * 10) / 10, good: p.recovery_score >= 50, note: p.recovery_score + '/100 → ' + (Math.round(p.recovery_score * 0.20 * 10) / 10) + ' pts toward your score' },
-      { label: 'SpO2 ×.10',     pts: Math.round(p.spo2_score * 0.10 * 10) / 10, good: p.spo2_score >= 50, note: p.spo2_score + '/100 → ' + (Math.round(p.spo2_score * 0.10 * 10) / 10) + ' pts toward your score' }
-    ];
-    document.getElementById('pLife').innerHTML = PARTS.map(l => `
-      <div class="life-row">
-        <span class="life-dot ${l.good ? 'good' : 'warn'}">${l.good ? '✓' : '!'}</span>
-        <span class="l-label">${l.label}</span>
-        <span class="l-note">${l.note}</span>
       </div>`).join('');
 
     const badges = [];
