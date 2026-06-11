@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.3/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --sky-1:#a5e3ff;
@@ -423,7 +423,8 @@
   /* ---------- Supabase waitlist (same backend as v1) ---------- */
   const SUPABASE_URL = 'https://omfnsjrsswuxkqubagzr.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tZm5zanJzc3d1eGtxdWJhZ3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk4MjgsImV4cCI6MjA5NjcwNTgyOH0.lJuGVbc3XZRiQoPPIZjtp1bYNezTVrjt4xKF7-sO-AA';
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Don't let a failed CDN load kill this script — routing must still work.
+  const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const form = document.getElementById('waitlistForm');
@@ -441,8 +442,10 @@
     // Save the email when we have a valid one, but route to the
     // leaderboard no matter what — the button always goes through.
     if(EMAIL_RE.test(email)){
-      const { error } = await db.from('waitlist').insert({ email });
-      if(error && error.code !== '23505') console.error(error); // 23505 = already on the list
+      if(db){
+        const { error } = await db.from('waitlist').insert({ email });
+        if(error && error.code !== '23505') console.error(error); // 23505 = already on the list
+      }
       sessionStorage.setItem('swimmers_email', email);
     }
 
