@@ -404,14 +404,26 @@
   // randomuser.me portrait set), mapped deterministically per swimmer id
   const YOUNG_FACES = [1,3,4,10,14,15,17,18,26,27,30,35,37,42,43,46,47,51,52,56,57,60,61,62,64,65,67,70,73,77,78,84,85,86,87,88,89,90,92,93,95,96,97,98];
 
-  // uploaded photo (backend, or saved locally on heart check), else a
+  // profile photos set via heart.html, keyed by normalised name
+  const avatarMap = new Map();
+  async function loadAvatars(){
+    try{
+      const { data } = await db.from('avatars').select('name_key,avatar_url');
+      if(Array.isArray(data)) for(const a of data) avatarMap.set(a.name_key, a.avatar_url);
+    }catch(_){ /* avatars table may not exist yet */ }
+  }
+
+  // backend photo (avatars table), then a device-local copy, else a
   // deterministic college-age placeholder headshot
-  const portrait = r => r.avatar_url
+  const portrait = r =>
+       avatarMap.get((r.name || '').trim().toLowerCase())
+    || r.avatar_url
     || localStorage.getItem('swimmers_avatar:' + (r.email || '').toLowerCase())
     || localStorage.getItem('swimmers_avatar:' + (r.name || '').trim().toLowerCase())
     || `https://randomuser.me/api/portraits/men/${YOUNG_FACES[r.id % YOUNG_FACES.length]}.jpg`;
 
   async function loadBoard(){
+    await loadAvatars();
     const { data, error } = await db
       .from('heart_leaderboard')
       .select('*')

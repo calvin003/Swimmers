@@ -641,33 +641,28 @@
       lookupBtn.textContent = 'Looking up…';
       say('');
 
-      // pull the board (same source the rankings use) and match in JS, so we
-      // don't depend on the view accepting a server-side email filter
-      const { data, error } = await db
-        .from('heart_leaderboard')
-        .select('*');
+      // look the swimmer up by email via a security-definer function, so the
+      // public API never has to expose the full email list
+      const { data, error } = await db.rpc('find_swimmer', { p_email: email });
 
       lookupBtn.disabled = false;
       lookupBtn.textContent = label;
 
       if(error){
         console.error(error);
-        say('Lookup failed: ' + (error.message || 'unknown error') + '.', true);
+        say('Lookup failed: ' + (error.message || 'unknown error') +
+            '. (Has the avatars SQL been run in Supabase?)', true);
         return;
       }
 
-      const rows = data || [];
-      const person = rows.find(r => (r.email || '').trim().toLowerCase() === email);
+      const person = Array.isArray(data) ? data[0] : data;
 
       if(!person){
-        const hasEmail = rows.some(r => r && Object.prototype.hasOwnProperty.call(r, 'email'));
-        say(hasEmail
-          ? 'No swimmer found with that email.'
-          : 'The rankings view doesn’t expose email, so email lookup isn’t available yet.', true);
+        say('No swimmer found with that email.', true);
         return;
       }
 
-      target = { email: (person.email || email).toLowerCase(), name: (person.name || '').trim() };
+      target = { email, name: (person.name || '').trim() };
 
       // preview the current photo: backend, then local, then nothing
       const current = person.avatar_url
@@ -714,31 +709,34 @@
       const label = saveBtn.textContent;
       saveBtn.textContent = 'Saving…';
 
-      // 1) device-local copy — the rankings & profile read these keys
+      // 1) device-local copy — instant feedback on this device
       try{
         localStorage.setItem('swimmers_avatar:' + target.email, newPhoto);
         if(target.name) localStorage.setItem('swimmers_avatar:' + target.name.toLowerCase(), newPhoto);
       }catch(_){ /* storage full — backend copy still applies */ }
 
-      // 2) try to persist to the backend for everyone
-      //    (needs an UPDATE policy + avatar_url column on heart_rate)
-      let backendOk = false;
+      // 2) persist for everyone via the security-definer RPC
+      let savedName = null, errMsg = null;
       try{
-        const { data, error } = await db
-          .from('heart_rate')
-          .update({ avatar_url: newPhoto })
-          .ilike('email', target.email)
-          .select('id');
-        backendOk = !error && Array.isArray(data) && data.length > 0;
-      }catch(_){ /* ignore — local copy still applies */ }
+        const { data, error } = await db.rpc('set_swimmer_avatar', {
+          p_email: target.email,
+          p_avatar: newPhoto
+        });
+        if(error) errMsg = error.message || 'save failed';
+        else savedName = data; // swimmer's name, or null if no match
+      }catch(e){ errMsg = String(e); }
 
       saveBtn.textContent = label;
       saveBtn.disabled = true; // require a new pick to re-enable
 
       const who = target.name || target.email;
-      say(backendOk
-        ? 'Saved ' + who + "'s photo for everyone. 🎉"
-        : 'Saved ' + who + "'s photo on this device — it now shows on the rankings here.", false);
+      if(savedName){
+        say('Saved ' + who + "'s photo for everyone. 🎉 It now shows on the rankings and their profile.", false);
+      } else if(errMsg){
+        say('Saved on this device, but the global save failed: ' + errMsg + '.', true);
+      } else {
+        say('Saved on this device only — no matching swimmer to save globally.', true);
+      }
     });
   })();
 </script>

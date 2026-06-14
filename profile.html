@@ -458,9 +458,19 @@
 
     const avatar = document.getElementById('pAvatar');
     avatar.style.background = COLORS[(rankIdx >= 0 ? rankIdx : 0) % COLORS.length];
-    // uploaded profile photo (backend, or saved locally on heart check),
-    // falling back to a deterministic placeholder headshot
-    const uploaded = p.avatar_url
+    // profile photo set via heart.html (avatars table, keyed by name),
+    // then a device-local copy, else a deterministic placeholder headshot
+    let backendPhoto = null;
+    try{
+      const { data: av } = await db
+        .from('avatars')
+        .select('avatar_url')
+        .eq('name_key', (p.name || '').trim().toLowerCase())
+        .limit(1);
+      if(Array.isArray(av) && av[0]) backendPhoto = av[0].avatar_url;
+    }catch(_){ /* avatars table may not exist yet */ }
+    const uploaded = backendPhoto
+      || p.avatar_url
       || localStorage.getItem('swimmers_avatar:' + (p.email || '').toLowerCase())
       || localStorage.getItem('swimmers_avatar:' + (p.name || '').trim().toLowerCase());
     avatar.style.backgroundImage = `url('${uploaded || `https://randomuser.me/api/portraits/men/${YOUNG_FACES[p.id % YOUNG_FACES.length]}.jpg`}')`;
