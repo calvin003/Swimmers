@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/entrepreneurs_first", "destination": "/entrepreneurs_first.html" }
+  ]
+}
