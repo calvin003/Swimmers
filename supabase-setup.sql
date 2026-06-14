@@ -128,3 +128,84 @@ $$;
 
 grant execute on function public.find_swimmer(text)            to anon;
 grant execute on function public.set_swimmer_avatar(text, text) to anon;
+
+-- ---------------------------------------------------------------
+-- Leagues (create.html) + members (join.html)
+--
+-- A "league" is a private group competition. The host creates one and
+-- shares a code/link; friends join via join.html?code=CODE.
+--
+-- The leagues table holds NO personal data (just league settings + the
+-- commissioner's display name), so it is safe to read publicly. The
+-- league_members table DOES hold emails, so it has no public select
+-- policy — the board is read through a SECURITY DEFINER function that
+-- returns names + scores only, never emails (same model as avatars).
+-- ---------------------------------------------------------------
+
+create table if not exists public.leagues (
+  id         bigint generated always as identity primary key,
+  code       text not null unique,                        -- shareable, e.g. SPLASH7
+  name       text not null,
+  host_name  text not null,
+  emoji      text not null default '🏊',
+  rank_by    text not null default 'score'  check (rank_by in ('score','count','motility')),
+  season     text not null default 'month'  check (season in ('week','month','quarter')),
+  access     text not null default 'link'   check (access in ('link','approve')),
+  entry      text not null default 'admin'  check (entry  in ('admin','self')),
+  ends_at    date,
+  created_at timestamptz not null default now()
+);
+
+alter table public.leagues enable row level security;
+
+-- Anyone can create a league.
+drop policy if exists "anyone can create a league" on public.leagues;
+create policy "anyone can create a league"
+  on public.leagues for insert to anon with check (true);
+
+-- League settings are public (no PII stored here) so join.html can read them
+-- and the insert .select() round-trip returns the new row to the creator.
+drop policy if exists "leagues are public" on public.leagues;
+create policy "leagues are public"
+  on public.leagues for select to anon using (true);
+
+create table if not exists public.league_members (
+  id         bigint generated always as identity primary key,
+  league_id  bigint not null references public.leagues(id) on delete cascade,
+  name       text not null,
+  email      text not null,
+  count      int,
+  motility   int,
+  morphology int,
+  volume     numeric,
+  swim_score int,
+  join_state text not null default 'self'   check (join_state in ('synced','self','admin','manual')),
+  status     text not null default 'joined' check (status in ('joined','pending')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.league_members enable row level security;
+
+-- Anyone can join a league (insert). No select/update/delete policy exists,
+-- so emails can never be read back through the public anon key.
+drop policy if exists "anyone can join a league" on public.league_members;
+create policy "anyone can join a league"
+  on public.league_members for insert to anon with check (true);
+
+-- Public board for a league by code: names + scores only, never emails.
+-- Runs as owner so it can read league_members without a public select policy.
+create or replace function public.league_board(p_code text)
+returns table(name text, swim_score int, join_state text, status text, created_at timestamptz)
+language sql
+security definer
+set search_path = public
+as $$
+  select m.name, m.swim_score, m.join_state, m.status, m.created_at
+  from public.league_members m
+  join public.leagues l on l.id = m.league_id
+  where upper(l.code) = upper(trim(p_code))
+    and m.status = 'joined'
+  order by m.swim_score desc nulls last, m.created_at asc;
+$$;
+
+grant execute on function public.league_board(text) to anon;

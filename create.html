@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swimmers — Start a league</title>
+<meta name="description" content="Start a private fertility face-off for the group chat. Name it, set the rules, get a shareable link.">
+<meta name="theme-color" content="#7ddcfd">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+<style>
+  :root{
+    --font-display:'Inter',system-ui,sans-serif;
+    --font-serif:'Instrument Serif',Georgia,serif;
+    --sky-1:#a5e3ff; --sky-2:#5db8ef; --sky-3:#3a97da;
+    --brand:#3f87bd; --brand-ink:#2c6c98; --brand-deep:#1c5a86;
+    --accent:#6fbcec; --accent-soft:#e3f3fd;
+    --surface:rgba(255,255,255,.94); --surface-solid:#fff; --surface-2:#f4fafe; --surface-3:#e6f3fc;
+    --ink:#1f3b4d; --ink-soft:#5e7588; --ink-faint:#9bb4c4;
+    --line:#e0eef7; --line-strong:#cfe3f0;
+    --good:#3aa372; --gold:#e3b53e; --lane:#e0664f;
+    --water-1:#9fd3f2; --water-2:#6fb8e8;
+    --r-md:16px; --r-lg:22px;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --gel:linear-gradient(180deg,#bfe7fa 0%,#6fbbe6 38%,#3f8ec6 80%,#5aa6d8 100%);
+    --gel-shadow:inset 0 2px 3px rgba(255,255,255,.8), inset 0 -4px 8px rgba(10,60,100,.26), 0 10px 22px rgba(30,110,165,.34);
+    --shadow-card:0 2px 6px rgba(40,110,160,.08), 0 18px 44px -20px rgba(40,110,160,.30);
+    --shadow-pop:0 28px 70px -24px rgba(30,100,150,.45);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font-display); color:var(--ink); line-height:1.6;
+    min-height:100vh; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #cdeeff 0%, transparent 50%),
+      linear-gradient(180deg, var(--sky-2) 0%, var(--sky-3) 30%, #7cc6f0 62%, #dff1fc 100%) fixed;
+  }
+  .serif{font-family:var(--font-serif);font-weight:400;letter-spacing:-.01em}
+  .num{font-feature-settings:"tnum" 1,"lnum" 1}
+
+  /* nav */
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    max-width:1140px;margin:0 auto;padding:26px 24px 0;
+  }
+  .logo{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:1.25rem;
+    letter-spacing:-.02em;text-shadow:0 1px 8px rgba(30,90,140,.35);text-decoration:none}
+  .logo svg{filter:drop-shadow(0 1px 4px rgba(30,90,140,.35))}
+  .navlink{color:rgba(255,255,255,.92);text-decoration:none;font-weight:600;font-size:.92rem;
+    text-shadow:0 1px 6px rgba(30,90,140,.4)}
+  .navlink:hover{color:#fff}
+
+  /* layout */
+  .flow{max-width:560px;margin:0 auto;padding:34px 22px 90px}
+  .step{display:none}
+  .step.on{display:block;animation:rise .5s var(--ease) both}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* typography */
+  .h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(2.2rem,6vw,3rem);line-height:1.06;letter-spacing:-.01em;margin:0}
+  .h2{font-family:var(--font-serif);font-weight:400;font-size:1.7rem;line-height:1.18;margin:0}
+  .eyebrow{font-weight:700;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--brand-ink);margin:0}
+  .lead{color:var(--ink-soft);font-size:1rem;line-height:1.5;margin:0}
+  .tiny{font-size:.78rem;color:var(--ink-faint);font-weight:500}
+  .on-sky{color:#fff;text-shadow:0 2px 22px rgba(40,110,170,.45),0 1px 3px rgba(30,95,145,.35)}
+  .on-sky .lead,.on-sky.lead{color:#e6f5ff}
+
+  /* hero card (step 0) */
+  .hero-copy{text-align:center;padding:30px 0 26px}
+  .hero-copy .h1{max-width:14ch;margin:18px auto 0}
+  .hero-copy .lead{max-width:30ch;margin:14px auto 0;color:#e6f5ff}
+  .mark{font-size:2.4rem}
+
+  /* buttons */
+  .btn{appearance:none;border:0;cursor:pointer;width:100%;font-family:var(--font-display);
+    font-weight:800;font-size:1.02rem;letter-spacing:-.01em;padding:16px 20px;border-radius:var(--r-md);
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    transition:transform .14s var(--ease),box-shadow .2s var(--ease),background .2s,filter .15s}
+  .btn:active{transform:translateY(1px) scale(.992)}
+  .btn-primary,.btn-accent{background:var(--gel);color:#fff;border:1px solid rgba(255,255,255,.6);
+    box-shadow:var(--gel-shadow);text-shadow:0 1px 2px rgba(10,60,100,.4)}
+  .btn-primary:hover,.btn-accent:hover{filter:brightness(1.05)}
+  .btn-ghost{background:var(--surface);color:var(--brand-ink);border:1.5px solid rgba(255,255,255,.85);backdrop-filter:blur(8px)}
+  .btn-ghost:hover{background:var(--surface-solid)}
+  .btn-sm{padding:11px 15px;font-size:.88rem;border-radius:12px;width:auto}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn svg{flex:0 0 auto}
+
+  /* cards */
+  .card{background:var(--surface);border:1px solid rgba(255,255,255,.85);border-radius:var(--r-lg);
+    box-shadow:var(--shadow-card);backdrop-filter:blur(9px)}
+  .card-pad{padding:18px}
+  .row{display:flex;align-items:center;gap:12px}
+  .between{justify-content:space-between}
+  .stack{display:flex;flex-direction:column}
+  .grow{flex:1}.center{text-align:center}
+  .divide{height:1px;background:var(--line);border:0;margin:0}
+  .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}
+
+  /* chips */
+  .chip{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.74rem;
+    padding:6px 11px;border-radius:999px;background:var(--surface-3);color:var(--ink-soft)}
+  .chip.brand{background:var(--accent-soft);color:var(--brand-ink)}
+  .chip.sky{background:#ffffff22;color:#eaf8ff}
+
+  /* steps progress */
+  .steps{display:flex;gap:6px;flex:1}
+  .steps i{height:5px;flex:1;border-radius:999px;background:var(--line-strong);transition:background .3s}
+  .steps i.on{background:var(--brand)}
+
+  /* fields */
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field>label{font-weight:700;font-size:.82rem;color:var(--ink)}
+  .input{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem;padding:14px 15px;
+    border-radius:14px;color:var(--ink);background:var(--surface-2);border:1.5px solid var(--line-strong);
+    transition:border-color .15s,box-shadow .15s}
+  .input::placeholder{color:var(--ink-faint);font-weight:500}
+  .input:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 16%,transparent)}
+  .input-icon{position:relative}
+  .input-icon .input{padding-left:44px}
+  .input-icon .ic{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--ink-faint)}
+
+  /* option cards */
+  .opt{text-align:left;width:100%;cursor:pointer;background:var(--surface);border:1.5px solid rgba(255,255,255,.85);
+    border-radius:16px;padding:14px 15px;display:flex;align-items:center;gap:13px;
+    transition:all .16s var(--ease);font-family:var(--font-display);backdrop-filter:blur(8px);box-shadow:var(--shadow-card)}
+  .opt:hover{border-color:var(--brand)}
+  .opt.on{border-color:var(--brand);background:var(--accent-soft);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 14%,transparent)}
+  .opt .opt-ic{width:42px;height:42px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center;background:var(--surface-3);color:var(--brand)}
+  .opt.on .opt-ic{background:var(--brand);color:#fff}
+  .opt .opt-t{display:block;font-weight:800;font-size:.95rem;color:var(--ink)}
+  .opt .opt-d{display:block;font-size:.78rem;color:var(--ink-soft);font-weight:500;margin-top:2px;line-height:1.35}
+  .opt .opt-check{margin-left:auto;width:22px;height:22px;border-radius:999px;border:2px solid var(--line-strong);
+    flex:0 0 auto;display:grid;place-items:center;color:#fff}
+  .opt.on .opt-check{background:var(--brand);border-color:var(--brand)}
+  .opt .opt-check svg{display:none}.opt.on .opt-check svg{display:block}
+
+  /* segmented */
+  .seg{display:flex;gap:4px;background:var(--surface-3);padding:4px;border-radius:13px}
+  .seg button{flex:1;appearance:none;border:0;cursor:pointer;background:transparent;font-family:var(--font-display);
+    font-weight:700;font-size:.84rem;color:var(--ink-soft);padding:9px 6px;border-radius:10px;transition:all .15s var(--ease)}
+  .seg button.on{background:var(--surface-solid);color:var(--ink);box-shadow:var(--shadow-card)}
+
+  /* invite link */
+  .linkbox{background:var(--surface-3);border-radius:12px;padding:12px 14px}
+  .linkbox .url{font-weight:700;font-size:.92rem;color:var(--brand-ink);word-break:break-all}
+
+  /* share sheet */
+  .sheet-scrim{position:fixed;inset:0;z-index:60;background:rgba(6,20,34,.42);backdrop-filter:blur(3px);
+    display:none;align-items:flex-end;justify-content:center}
+  .sheet-scrim.on{display:flex}
+  .sheet{width:100%;max-width:560px;background:var(--surface-solid);border-radius:26px 26px 0 0;
+    padding:12px 16px 22px;box-shadow:var(--shadow-pop);animation:slideup .34s var(--ease)}
+  @keyframes slideup{from{transform:translateY(34px)}to{transform:none}}
+  .sheet-grab{width:38px;height:5px;border-radius:999px;background:var(--line-strong);margin:4px auto 14px}
+  .imsg{background:#e9e9eb;border-radius:20px;padding:4px;max-width:86%;margin:0 auto 16px}
+  .imsg-card{background:var(--surface-solid);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-card)}
+  .imsg-water{background:linear-gradient(180deg,var(--water-1),var(--water-2));padding:18px 16px;color:#fff}
+  .share-apps{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 14px;scrollbar-width:none}
+  .share-apps::-webkit-scrollbar{display:none}
+  .share-app{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;width:64px;cursor:pointer}
+  .share-app .ic{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-card);transition:transform .14s var(--ease)}
+  .share-app:hover .ic{transform:translateY(-3px)}
+  .share-app span{font-size:.72rem;font-weight:600;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:64px}
+
+  /* confetti */
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden;display:none}
+  .confetti.on{display:block}
+  .confetti i{position:absolute;top:-12px;width:9px;height:13px;border-radius:2px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
+
+  footer{padding:30px 24px;text-align:center}
+  footer .foot{color:rgba(255,255,255,.85);font-size:.82rem;text-shadow:0 1px 6px rgba(30,90,140,.4)}
+  footer a{color:#fff;text-decoration:none;font-weight:600}
+
+  @media(prefers-reduced-motion:reduce){
+    .step.on,.sheet{animation:none}
+    .confetti{display:none!important}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#fff" opacity=".95"/></svg>
+    Swimmers
+  </a>
+  <a class="navlink" href="leaderboard.html">View leaderboard →</a>
+</nav>
+
+<main class="flow">
+
+  <!-- ===== Step 0 — landing ===== -->
+  <section class="step on" data-step="0">
+    <div class="hero-copy">
+      <div class="mark">🌊</div>
+      <h1 class="h1 on-sky">Start a league. Settle it in the pool.</h1>
+      <p class="lead">A friendly fertility face-off for the group chat. Track your swimmers, climb the board, talk your trash.</p>
+    </div>
+    <div class="card card-pad">
+      <div class="row" style="gap:10px;flex-wrap:wrap">
+        <span class="chip brand">👥 Built for the boys</span>
+        <span class="chip">🔒 Private</span>
+      </div>
+      <button class="btn btn-primary mt16" id="startBtn">Create a league →</button>
+      <a class="btn btn-ghost mt12" href="join.html" style="font-size:.9rem;padding:13px;text-decoration:none">I have an invite link</a>
+    </div>
+    <p class="tiny center mt16" style="color:#dff1fc">No app to download · works right in your browser</p>
+  </section>
+
+  <!-- ===== Steps 1–3 — wizard ===== -->
+  <section class="step" data-step="wizard">
+    <div class="row between">
+      <button class="btn-sm btn-ghost" id="wizBack" aria-label="Back">←</button>
+      <div class="steps" id="stepDots"><i></i><i></i><i></i></div>
+      <span class="tiny" style="font-weight:700" id="stepLabel">1/3</span>
+    </div>
+
+    <!-- step 1 -->
+    <div class="wizpane on" data-pane="1">
+      <div class="stack mt20" style="gap:18px">
+        <div><p class="eyebrow">Step 1 · Name it</p><h2 class="h2 mt8">What's the league called?</h2></div>
+        <div class="field">
+          <label for="leagueName">League name</label>
+          <input class="input" id="leagueName" value="Spring Splash Classic" placeholder="e.g. Summer Splash">
+        </div>
+        <div class="field">
+          <label for="hostName">Your name (the commissioner)</label>
+          <div class="input-icon">
+            <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <input class="input" id="hostName" value="Marcus" placeholder="Marcus">
+          </div>
+        </div>
+        <button class="btn btn-primary mt8" data-next="2">Next →</button>
+      </div>
+    </div>
+
+    <!-- step 2 -->
+    <div class="wizpane" data-pane="2">
+      <div class="stack mt20" style="gap:18px">
+        <div><p class="eyebrow">Step 2 · The rules</p><h2 class="h2 mt8">How do we crown a winner?</h2></div>
+        <div class="field">
+          <label>Rank the board by</label>
+          <div class="stack" style="gap:9px" id="rankGroup">
+            <button class="opt on" data-rank="score">
+              <span class="opt-ic">🏆</span>
+              <span style="flex:1"><span class="opt-t">SwimScore (recommended)</span><span class="opt-d">One blended 0–100 score from all 4 metrics</span></span>
+              <span class="opt-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span>
+            </button>
+            <button class="opt" data-rank="count">
+              <span class="opt-ic">💧</span>
+              <span style="flex:1"><span class="opt-t">Total count</span><span class="opt-d">Pure millions per mL — bragging rights</span></span>
+              <span class="opt-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span>
+            </button>
+            <button class="opt" data-rank="motility">
+              <span class="opt-ic">⚡</span>
+              <span style="flex:1"><span class="opt-t">Motility (fastest swimmers)</span><span class="opt-d">% actively swimming</span></span>
+              <span class="opt-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Season length</label>
+          <div class="seg" id="seasonSeg">
+            <button data-season="week">1 week</button>
+            <button class="on" data-season="month">1 month</button>
+            <button data-season="quarter">3 months</button>
+          </div>
+        </div>
+        <button class="btn btn-primary mt8" data-next="3">Next →</button>
+      </div>
+    </div>
+
+    <!-- step 3 -->
+    <div class="wizpane" data-pane="3">
+      <div class="stack mt20" style="gap:18px">
+        <div><p class="eyebrow">Step 3 · Joining</p><h2 class="h2 mt8">Who's allowed, and who logs results?</h2></div>
+        <div class="field">
+          <label>Who can join</label>
+          <div class="stack" style="gap:9px" id="accessGroup">
+            <button class="opt on" data-access="link">
+              <span class="opt-ic">🔗</span>
+              <span style="flex:1"><span class="opt-t">Anyone with the link</span><span class="opt-d">Easiest — perfect for a group chat</span></span>
+              <span class="opt-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span>
+            </button>
+            <button class="opt" data-access="approve">
+              <span class="opt-ic">🔒</span>
+              <span style="flex:1"><span class="opt-t">I approve each request</span><span class="opt-d">You vet every swimmer before they're in</span></span>
+              <span class="opt-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Where do results come from?</label>
+          <div class="stack" style="gap:9px" id="entryGroup">
+            <button class="opt on" data-entry="admin">
+              <span class="opt-ic">✏️</span>
+              <span style="flex:1"><span class="opt-t">I enter them (admin site)</span><span class="opt-d">You run the lab results from your dashboard</span></span>
+              <span class="opt-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span>
+            </button>
+            <button class="opt" data-entry="self">
+              <span class="opt-ic">⌚</span>
+              <span style="flex:1"><span class="opt-t">Swimmers log their own</span><span class="opt-d">They enter results when they join</span></span>
+              <span class="opt-check"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span>
+            </button>
+          </div>
+        </div>
+        <button class="btn btn-primary mt8" id="createBtn">✓ Create league</button>
+        <p class="tiny center" id="createMsg" role="status" style="min-height:1.2em"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Step 4 — link ready ===== -->
+  <section class="step" data-step="done">
+    <div class="center mt8">
+      <div style="font-size:3.2rem" id="doneEmoji">🏊</div>
+      <p class="eyebrow mt8">Your league is live</p>
+      <h1 class="h1 mt8" id="doneName">Spring Splash Classic</h1>
+      <p class="lead mt8">Drop the link in the group chat and watch them pile in.</p>
+    </div>
+
+    <div class="card card-pad mt20">
+      <p class="tiny" style="font-weight:700;letter-spacing:.08em;text-transform:uppercase">Invite link</p>
+      <div class="row between mt8 linkbox">
+        <span class="num url" id="inviteUrl">swimmers.app/j/…</span>
+        <button class="btn-sm" id="copyBtn" style="background:var(--brand);color:#fff;border:0">Copy</button>
+      </div>
+      <button class="btn btn-accent mt12" id="shareBtn">↗ Share to group chat</button>
+    </div>
+
+    <div class="row between mt20" style="padding:0 4px">
+      <div class="center grow"><div class="num" style="font-weight:900;font-size:1.4rem">0</div><div class="tiny">swimmers</div></div>
+      <div class="center grow"><div class="num" style="font-weight:900;font-size:1.4rem" id="doneSeason">30d</div><div class="tiny">season</div></div>
+      <div class="center grow"><div class="num" style="font-weight:900;font-size:1.4rem" id="doneCode">SPLASH</div><div class="tiny">code</div></div>
+    </div>
+    <a class="btn btn-ghost mt20" id="previewBtn" href="#" style="text-decoration:none">Preview the join page</a>
+  </section>
+
+</main>
+
+<footer><div class="foot">Private leagues · your numbers are yours. <a href="index.html">Swimmers</a></div></footer>
+
+<!-- share sheet -->
+<div class="sheet-scrim" id="shareSheet">
+  <div class="sheet">
+    <div class="sheet-grab"></div>
+    <div class="imsg">
+      <div class="imsg-card">
+        <div class="imsg-water">
+          <div style="font-size:1.9rem" id="sheetEmoji">🏊</div>
+          <div class="serif" style="font-weight:400;font-size:1.15rem;margin-top:4px" id="sheetName">Spring Splash Classic</div>
+          <div style="font-size:.78rem;color:#cdeeff" id="sheetSub">Marcus challenged you · tap to join</div>
+        </div>
+        <div style="padding:9px 14px;font-size:.78rem;color:var(--ink-soft);font-weight:600" id="sheetUrl">swimmers.app/j/…</div>
+      </div>
+    </div>
+    <div class="share-apps">
+      <div class="share-app" data-act="close"><div class="ic" style="background:#34DA50">💬</div><span>Messages</span></div>
+      <div class="share-app" data-act="shared"><div class="ic" style="background:#0E86CE">👥</div><span>The Boys</span></div>
+      <div class="share-app" data-act="close"><div class="ic" style="background:#25D366">📱</div><span>WhatsApp</span></div>
+      <div class="share-app" data-act="close"><div class="ic" style="background:#E1306C">📷</div><span>Instagram</span></div>
+      <div class="share-app" data-act="copy"><div class="ic" style="background:#8898A6">⧉</div><span>Copy</span></div>
+    </div>
+    <button class="btn btn-primary" data-act="shared">↗ Send to the group chat</button>
+    <button class="btn btn-ghost mt12" data-act="close" style="padding:13px;font-size:.9rem">Cancel</button>
+  </div>
+</div>
+
+<div class="confetti" id="confetti"></div>
+
+<script>
+  /* ---------- Supabase (same backend as the rest of the site) ---------- */
+  const SUPABASE_URL = 'https://omfnsjrsswuxkqubagzr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tZm5zanJzc3d1eGtxdWJhZ3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk4MjgsImV4cCI6MjA5NjcwNTgyOH0.lJuGVbc3XZRiQoPPIZjtp1bYNezTVrjt4xKF7-sO-AA';
+  const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+  /* ---------- state ---------- */
+  const state = {
+    name: 'Spring Splash Classic', host: 'Marcus', emoji: '🏊',
+    rankBy: 'score', season: 'month', access: 'link', entry: 'admin', code: null
+  };
+  const SEASON_DAYS = { week: 7, month: 30, quarter: 90 };
+  const SEASON_LABEL = { week: '7d', month: '30d', quarter: '90d' };
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const showStep = key => $$('.step').forEach(el => el.classList.toggle('on', el.dataset.step === key));
+
+  /* ---------- wizard panes ---------- */
+  let pane = 1;
+  function showPane(n){
+    pane = n;
+    $$('.wizpane').forEach(el => el.classList.toggle('on', +el.dataset.pane === n));
+    $$('#stepDots i').forEach((d, i) => d.classList.toggle('on', i <= n - 1));
+    $('#stepLabel').textContent = n + '/3';
+  }
+
+  $('#startBtn').onclick = () => { showStep('wizard'); showPane(1); window.scrollTo(0, 0); };
+  $('#wizBack').onclick = () => { if (pane > 1) showPane(pane - 1); else showStep('0'); };
+  $$('[data-next]').forEach(b => b.onclick = () => {
+    if (pane === 1 && !$('#leagueName').value.trim()) { $('#leagueName').focus(); return; }
+    showPane(+b.dataset.next);
+  });
+
+  /* option groups */
+  function wireOpts(groupSel, key){
+    $$(groupSel + ' .opt').forEach(opt => opt.onclick = () => {
+      $$(groupSel + ' .opt').forEach(o => o.classList.remove('on'));
+      opt.classList.add('on');
+      state[key] = opt.dataset.rank || opt.dataset.access || opt.dataset.entry;
+    });
+  }
+  wireOpts('#rankGroup', 'rankBy');
+  wireOpts('#accessGroup', 'access');
+  wireOpts('#entryGroup', 'entry');
+  $$('#seasonSeg button').forEach(b => b.onclick = () => {
+    $$('#seasonSeg button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); state.season = b.dataset.season;
+  });
+
+  /* ---------- code + link helpers ---------- */
+  function makeCode(){
+    const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';      // no ambiguous chars
+    let c = ''; for (let i = 0; i < 6; i++) c += A[Math.floor(Math.random() * A.length)];
+    return c;
+  }
+  function inviteUrl(code){
+    const base = location.href.replace(/[^/]*$/, '');   // dir of current page
+    return base + 'join.html?code=' + code;
+  }
+  function prettyUrl(u){ return u.replace(/^https?:\/\//, ''); }
+
+  /* ---------- create league ---------- */
+  $('#createBtn').onclick = async () => {
+    const btn = $('#createBtn'), msg = $('#createMsg');
+    state.name = $('#leagueName').value.trim() || 'My Swimmers League';
+    state.host = $('#hostName').value.trim() || 'The Commissioner';
+    btn.disabled = true; btn.textContent = 'Creating…'; msg.textContent = '';
+
+    const ends = new Date(Date.now() + SEASON_DAYS[state.season] * 864e5)
+      .toISOString().slice(0, 10);
+
+    let code = makeCode(), saved = false;
+    if (db){
+      for (let attempt = 0; attempt < 4 && !saved; attempt++){
+        const { error } = await db.from('leagues').insert({
+          code, name: state.name, host_name: state.host, emoji: state.emoji,
+          rank_by: state.rankBy, season: state.season, access: state.access,
+          entry: state.entry, ends_at: ends
+        });
+        if (!error){ saved = true; break; }
+        if (error.code === '23505'){ code = makeCode(); continue; }   // code clash → retry
+        console.error(error);
+        msg.textContent = "Couldn't save the league — but here's your link anyway.";
+        break;
+      }
+    }
+    state.code = code;
+    renderDone();
+    showStep('done');
+    window.scrollTo(0, 0);
+    btn.disabled = false; btn.textContent = '✓ Create league';
+  };
+
+  /* ---------- done screen ---------- */
+  function renderDone(){
+    const url = inviteUrl(state.code);
+    $('#doneEmoji').textContent = state.emoji;
+    $('#doneName').textContent = state.name;
+    $('#doneCode').textContent = state.code;
+    $('#doneSeason').textContent = SEASON_LABEL[state.season];
+    $('#inviteUrl').textContent = prettyUrl(url);
+    $('#previewBtn').href = url;
+    // share sheet preview
+    $('#sheetEmoji').textContent = state.emoji;
+    $('#sheetName').textContent = state.name;
+    $('#sheetSub').textContent = state.host + ' challenged you · tap to join';
+    $('#sheetUrl').textContent = prettyUrl(url);
+  }
+
+  $('#copyBtn').onclick = () => copyLink($('#copyBtn'));
+  function copyLink(btn){
+    const url = inviteUrl(state.code);
+    navigator.clipboard?.writeText(url);
+    const old = btn.textContent; btn.textContent = '✓ Copied'; btn.style.background = 'var(--good)';
+    setTimeout(() => { btn.textContent = old; btn.style.background = 'var(--brand)'; }, 1600);
+  }
+
+  /* ---------- share sheet ---------- */
+  const sheet = $('#shareSheet');
+  $('#shareBtn').onclick = () => sheet.classList.add('on');
+  sheet.onclick = e => { if (e.target === sheet) sheet.classList.remove('on'); };
+  $$('#shareSheet [data-act]').forEach(el => el.onclick = () => {
+    const act = el.dataset.act;
+    if (act === 'copy'){ copyLink($('#copyBtn')); sheet.classList.remove('on'); }
+    else if (act === 'shared'){ sheet.classList.remove('on'); fireConfetti(); }
+    else sheet.classList.remove('on');
+  });
+
+  /* ---------- confetti ---------- */
+  function fireConfetti(){
+    const box = $('#confetti'); if (!box) return;
+    const colors = ['#0E86CE','#03BEE6','#FFC23C','#FF5747','#15BE78','#7A5AE0'];
+    box.innerHTML = '';
+    for (let i = 0; i < 40; i++){
+      const i2 = document.createElement('i');
+      i2.style.left = Math.random() * 100 + '%';
+      i2.style.background = colors[i % colors.length];
+      i2.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+      i2.style.animationDelay = (Math.random() * .4) + 's';
+      i2.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+      box.appendChild(i2);
+    }
+    box.classList.add('on');
+    setTimeout(() => box.classList.remove('on'), 2800);
+  }
+</script>
+</body>
+</html>

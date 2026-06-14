@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swimmers — Join the league</title>
+<meta name="description" content="You've been challenged. Join the league, log your swimmers, and climb the board.">
+<meta name="theme-color" content="#7ddcfd">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+<style>
+  :root{
+    --font-display:'Inter',system-ui,sans-serif;
+    --font-serif:'Instrument Serif',Georgia,serif;
+    --sky-1:#a5e3ff; --sky-2:#5db8ef; --sky-3:#3a97da;
+    --brand:#3f87bd; --brand-ink:#2c6c98; --brand-deep:#1c5a86;
+    --accent:#6fbcec; --accent-soft:#e3f3fd;
+    --surface:rgba(255,255,255,.94); --surface-solid:#fff; --surface-2:#f4fafe; --surface-3:#e6f3fc;
+    --ink:#1f3b4d; --ink-soft:#5e7588; --ink-faint:#9bb4c4;
+    --line:#e0eef7; --line-strong:#cfe3f0;
+    --good:#3aa372; --gold:#e3b53e; --lane:#e0664f;
+    --water-1:#9fd3f2; --water-2:#6fb8e8;
+    --r-md:16px; --r-lg:22px;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --gel:linear-gradient(180deg,#bfe7fa 0%,#6fbbe6 38%,#3f8ec6 80%,#5aa6d8 100%);
+    --gel-shadow:inset 0 2px 3px rgba(255,255,255,.8), inset 0 -4px 8px rgba(10,60,100,.26), 0 10px 22px rgba(30,110,165,.34);
+    --shadow-card:0 2px 6px rgba(40,110,160,.08), 0 18px 44px -20px rgba(40,110,160,.30);
+    --shadow-pop:0 28px 70px -24px rgba(30,100,150,.45);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font-display); color:var(--ink); line-height:1.6;
+    min-height:100vh; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #cdeeff 0%, transparent 50%),
+      linear-gradient(180deg, var(--sky-2) 0%, var(--sky-3) 30%, #7cc6f0 62%, #dff1fc 100%) fixed;
+  }
+  .serif{font-family:var(--font-serif);font-weight:400;letter-spacing:-.01em}
+  .num{font-feature-settings:"tnum" 1,"lnum" 1}
+
+  nav{display:flex;align-items:center;justify-content:space-between;max-width:1140px;margin:0 auto;padding:26px 24px 0}
+  .logo{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:1.25rem;
+    letter-spacing:-.02em;text-shadow:0 1px 8px rgba(30,90,140,.35);text-decoration:none}
+  .navlink{color:rgba(255,255,255,.92);text-decoration:none;font-weight:600;font-size:.92rem;text-shadow:0 1px 6px rgba(30,90,140,.4)}
+  .navlink:hover{color:#fff}
+
+  .flow{max-width:560px;margin:0 auto;padding:30px 22px 90px}
+  .step{display:none}
+  .step.on{display:block;animation:rise .5s var(--ease) both}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  .h1{font-family:var(--font-serif);font-weight:400;font-size:clamp(2rem,5.5vw,2.7rem);line-height:1.06;letter-spacing:-.01em;margin:0}
+  .h2{font-family:var(--font-serif);font-weight:400;font-size:1.6rem;line-height:1.18;margin:0}
+  .eyebrow{font-weight:700;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--brand-ink);margin:0}
+  .lead{color:var(--ink-soft);font-size:1rem;line-height:1.5;margin:0}
+  .tiny{font-size:.78rem;color:var(--ink-faint);font-weight:500}
+  .on-sky{color:#fff;text-shadow:0 2px 22px rgba(40,110,170,.45),0 1px 3px rgba(30,95,145,.35)}
+  .on-sky.lead,.on-sky .lead{color:#e6f5ff}
+
+  .btn{appearance:none;border:0;cursor:pointer;width:100%;font-family:var(--font-display);font-weight:800;
+    font-size:1.02rem;letter-spacing:-.01em;padding:16px 20px;border-radius:var(--r-md);
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    transition:transform .14s var(--ease),box-shadow .2s var(--ease),filter .15s}
+  .btn:active{transform:translateY(1px) scale(.992)}
+  .btn-primary,.btn-accent{background:var(--gel);color:#fff;border:1px solid rgba(255,255,255,.6);box-shadow:var(--gel-shadow);text-shadow:0 1px 2px rgba(10,60,100,.4)}
+  .btn-primary:hover,.btn-accent:hover{filter:brightness(1.05)}
+  .btn-ghost{background:var(--surface);color:var(--brand-ink);border:1.5px solid rgba(255,255,255,.85);backdrop-filter:blur(8px)}
+  .btn-ghost:hover{background:var(--surface-solid)}
+  .btn-sm{padding:11px 15px;font-size:.88rem;border-radius:12px;width:auto}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn.sky{background:#ffffff22;color:#fff;border:1px solid #ffffff44}
+
+  .card{background:var(--surface);border:1px solid rgba(255,255,255,.85);border-radius:var(--r-lg);box-shadow:var(--shadow-card);backdrop-filter:blur(9px)}
+  .card-pad{padding:18px}
+  .row{display:flex;align-items:center;gap:12px}
+  .between{justify-content:space-between}
+  .stack{display:flex;flex-direction:column}
+  .grow{flex:1}.center{text-align:center}
+  .divide{height:1px;background:var(--line);border:0;margin:0}
+  .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}
+
+  .chip{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.74rem;padding:6px 11px;border-radius:999px;background:var(--surface-3);color:var(--ink-soft)}
+  .chip.brand{background:var(--accent-soft);color:var(--brand-ink)}
+  .chip.sky{background:#ffffff22;color:#eaf8ff}
+  .chip.good{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
+
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field>label{font-weight:700;font-size:.82rem;color:var(--ink)}
+  .input{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem;padding:14px 15px;border-radius:14px;
+    color:var(--ink);background:var(--surface-2);border:1.5px solid var(--line-strong);transition:border-color .15s,box-shadow .15s}
+  .input::placeholder{color:var(--ink-faint);font-weight:500}
+  .input:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 16%,transparent)}
+  .input.err{border-color:var(--lane);box-shadow:0 0 0 4px color-mix(in srgb,var(--lane) 16%,transparent)}
+  .input-icon{position:relative}.input-icon .input{padding-left:44px}
+  .input-icon .ic{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--ink-faint)}
+  .err-msg{color:var(--lane);font-size:.78rem;font-weight:600;display:none}
+  .err-msg.on{display:flex;align-items:center;gap:5px}
+
+  /* ranking rows on invite landing */
+  .rk{display:flex;align-items:center;gap:11px}
+  .rk .pos{font-weight:900;font-size:1rem;width:18px}
+  .rk .nm{font-weight:800;font-size:.92rem;flex:1}
+  .rk .sc{font-weight:900;font-size:1.1rem}
+  .av{border-radius:50%;width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;
+    font-weight:800;color:#fff;font-size:.82rem;box-shadow:inset 0 0 0 2px #ffffff40;background:linear-gradient(150deg,#0E86CE,#063a5c)}
+
+  /* sliders */
+  .mrow{padding:10px 0;border-bottom:1px solid var(--line)}
+  .mrow:last-of-type{border-bottom:0}
+  .mrow .mlbl{font-weight:700;font-size:.86rem}
+  .mrow .mval{font-weight:800}
+  .mrow .mval small{color:var(--ink-faint);font-size:.68rem;margin-left:3px}
+  .rng{-webkit-appearance:none;appearance:none;width:100%;height:7px;border-radius:999px;background:var(--surface-3);outline:none;margin-top:8px}
+  .rng::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--brand);cursor:pointer;box-shadow:0 3px 8px -2px var(--brand);border:3px solid var(--surface-solid)}
+  .rng::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--brand);cursor:pointer;border:3px solid var(--surface-solid)}
+
+  /* donut */
+  .donut{position:relative;width:104px;height:104px}
+  .donut svg{transform:rotate(-90deg)}
+  .donut .dv{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+  .donut .dv b{font-weight:900;font-size:1.9rem;line-height:1;display:block}
+  .donut .dv span{font-size:.6rem;font-weight:700;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase}
+
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden;display:none}
+  .confetti.on{display:block}
+  .confetti i{position:absolute;top:-12px;width:9px;height:13px;border-radius:2px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
+
+  footer{padding:30px 24px;text-align:center}
+  footer .foot{color:rgba(255,255,255,.85);font-size:.82rem;text-shadow:0 1px 6px rgba(30,90,140,.4)}
+  footer a{color:#fff;text-decoration:none;font-weight:600}
+
+  @media(prefers-reduced-motion:reduce){.step.on{animation:none}.confetti{display:none!important}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#fff" opacity=".95"/></svg>
+    Swimmers
+  </a>
+  <a class="navlink" href="create.html">Start your own →</a>
+</nav>
+
+<main class="flow">
+
+  <!-- ===== code entry (no/invalid code) ===== -->
+  <section class="step" data-step="code">
+    <div class="center on-sky" style="padding:24px 0 18px">
+      <div style="font-size:3rem">🏊</div>
+      <h1 class="h1 on-sky mt12">Got an invite code?</h1>
+      <p class="lead on-sky mt8">Enter the league code your commissioner shared, or open their invite link.</p>
+    </div>
+    <div class="card card-pad mt8">
+      <div class="field">
+        <label for="codeInput">League code</label>
+        <input class="input" id="codeInput" placeholder="e.g. SPLASH7" style="text-transform:uppercase;letter-spacing:.1em;font-weight:800">
+      </div>
+      <p class="tiny mt8" id="codeMsg" role="status" style="min-height:1.1em"></p>
+      <button class="btn btn-primary mt12" id="codeGo">Find my league →</button>
+    </div>
+  </section>
+
+  <!-- ===== loading ===== -->
+  <section class="step on" data-step="loading">
+    <div class="center on-sky" style="padding:80px 0"><div style="font-size:2.4rem">🌊</div><p class="lead on-sky mt12">Loading the league…</p></div>
+  </section>
+
+  <!-- ===== Step 0 — invite landing ===== -->
+  <section class="step" data-step="invite">
+    <div class="center on-sky" style="padding:8px 0 18px">
+      <div style="font-size:3rem" id="invEmoji">🏊</div>
+      <p class="eyebrow mt8" style="color:#cdeeff">You've been challenged</p>
+      <h1 class="h1 on-sky mt8" id="invName">The League</h1>
+      <p class="lead on-sky mt8"><b style="color:#fff" id="invHost">The host</b> <span id="invHostRest">invited you to compete</span></p>
+      <div class="row" style="justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <span class="chip sky" id="invCount">👥 0 swimmers</span>
+        <span class="chip sky" id="invEnds">⏱ Open season</span>
+      </div>
+    </div>
+
+    <div class="card card-pad">
+      <p class="tiny" style="font-weight:700;letter-spacing:.06em;text-transform:uppercase">Current top 3</p>
+      <div class="stack mt12" style="gap:10px" id="top3"></div>
+      <div class="divide mt12" style="margin-bottom:12px"></div>
+      <span class="lead" style="font-size:.92rem">Think your boys can beat that?</span>
+      <button class="btn btn-primary mt12" id="joinStart">Join the league →</button>
+    </div>
+    <p class="tiny center mt16" style="color:#dff1fc">🔒 Private league · your numbers are yours</p>
+  </section>
+
+  <!-- ===== Step 1 — sign in ===== -->
+  <section class="step" data-step="signin">
+    <button class="btn-sm btn-ghost" id="signinBack" style="align-self:flex-start">←</button>
+    <div class="mt16">
+      <p class="eyebrow">Join <span id="siName">the league</span></p>
+      <h1 class="h1 mt8">Claim your lane</h1>
+      <p class="lead mt8">Just a name and email so we can save your spot and ping you when results post.</p>
+    </div>
+    <div class="stack mt24" style="gap:16px">
+      <div class="field">
+        <label for="dispName">Display name</label>
+        <div class="input-icon">
+          <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+          <input class="input" id="dispName" placeholder="What the board calls you">
+        </div>
+        <span class="err-msg" id="nameErr">⊘ Give us at least 2 characters</span>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <div class="input-icon">
+          <svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg>
+          <input class="input" id="email" type="email" placeholder="you@email.com">
+        </div>
+        <span class="err-msg" id="emailErr">⊘ That email looks off</span>
+      </div>
+      <button class="btn btn-primary" id="signinNext">Continue →</button>
+      <p class="tiny center" style="line-height:1.5">By joining you agree numbers shared here stay in this league. No data sold, ever.</p>
+    </div>
+  </section>
+
+  <!-- ===== Step 2 — connect data ===== -->
+  <section class="step" data-step="connect">
+    <button class="btn-sm btn-ghost" id="connectBack" style="align-self:flex-start">←</button>
+    <div class="mt16">
+      <p class="eyebrow">Almost in, <span id="cnName">swimmer</span></p>
+      <h1 class="h1 mt8" id="cnTitle">Add your swimmers</h1>
+    </div>
+
+    <!-- self / manual entry -->
+    <div id="manualPane">
+      <p class="lead mt8">Punch in your latest at-home test. You can update it any time.</p>
+      <div class="card card-pad mt20" id="sliders"></div>
+      <button class="btn btn-primary mt20" id="postScore">✓ Post my score</button>
+    </div>
+
+    <!-- admin (commissioner enters) -->
+    <div id="benchPane" style="display:none">
+      <p class="lead mt8"><b style="color:var(--ink)" id="benchHost">The host</b> runs the lab results for this league. Your score posts the moment they enter your first test.</p>
+      <div class="card card-pad mt20 center">
+        <div style="font-size:2.6rem">⏳</div>
+        <h2 class="h2 mt12">You're on the bench</h2>
+        <p class="lead mt8">We'll ping you the second your numbers hit the board. Trash talk early — it's allowed.</p>
+        <div class="row" style="justify-content:center;margin-top:14px"><span class="chip brand" id="benchEmail">✉ you@email.com</span></div>
+      </div>
+      <button class="btn btn-primary mt20" id="benchGo">Got it, take me in →</button>
+    </div>
+  </section>
+
+  <!-- ===== Step 3 — you're in ===== -->
+  <section class="step" data-step="done">
+    <div class="center on-sky" style="padding:30px 0 0">
+      <div style="font-size:3.4rem">🎉</div>
+      <h1 class="h1 on-sky mt12">You're in, <span id="doneName">swimmer</span>!</h1>
+      <p class="lead on-sky mt12" id="doneSub">You slotted straight into the race.</p>
+    </div>
+    <div class="card card-pad mt24" id="debutCard">
+      <p class="tiny" style="font-weight:700;letter-spacing:.06em;text-transform:uppercase">Your debut</p>
+      <div class="row between mt8">
+        <div><div class="num" style="font-weight:900;font-size:2.4rem;color:var(--ink)" id="doneRank">#1</div><div class="tiny" id="doneOf">of 1 swimmers</div></div>
+        <div class="donut" id="doneDonut"></div>
+      </div>
+    </div>
+    <a class="btn btn-accent mt24" href="leaderboard.html" style="text-decoration:none">🏆 See the full leaderboard</a>
+    <button class="btn sky mt12" id="bragBtn">↗ Brag in the group chat</button>
+  </section>
+
+</main>
+
+<footer><div class="foot">Private leagues · your numbers are yours. <a href="index.html">Swimmers</a></div></footer>
+<div class="confetti" id="confetti"></div>
+
+<script>
+  /* ---------- Supabase ---------- */
+  const SUPABASE_URL = 'https://omfnsjrsswuxkqubagzr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tZm5zanJzc3d1eGtxdWJhZ3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk4MjgsImV4cCI6MjA5NjcwNTgyOH0.lJuGVbc3XZRiQoPPIZjtp1bYNezTVrjt4xKF7-sO-AA';
+  const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+  /* ---------- SwimScore model (matches the prototype) ---------- */
+  const M = {
+    count:      { cap: 100, unit: 'M/mL',     label: 'Count',      w: .35 },
+    motility:   { cap: 70,  unit: '% motile', label: 'Motility',   w: .30 },
+    morphology: { cap: 20,  unit: '% normal', label: 'Morphology', w: .20 },
+    volume:     { cap: 5,   unit: 'mL',       label: 'Volume',     w: .15 },
+  };
+  function swimScore(s){
+    let t = 0; for (const k in M) t += M[k].w * Math.min(1, (s[k] || 0) / M[k].cap);
+    return Math.round(t * 100);
+  }
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const showStep = key => $$('.step').forEach(el => el.classList.toggle('on', el.dataset.step === key));
+  const initials = n => n.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+
+  let league = null;            // {code,name,host_name,emoji,entry,access,ends_at,...}
+  let board = [];               // [{name,swim_score,...}]
+  const me = { name: '', email: '', metrics: { count: 60, motility: 52, morphology: 10, volume: 2.8 } };
+
+  /* ---------- boot: read ?code= ---------- */
+  function getCode(){
+    const c = new URLSearchParams(location.search).get('code');
+    return c ? c.trim().toUpperCase() : '';
+  }
+
+  async function loadLeague(code){
+    if (!db){ showStep('code'); $('#codeMsg').textContent = "Can't reach the league service right now."; return; }
+    const { data: lg, error } = await db.from('leagues').select('*').eq('code', code).maybeSingle();
+    if (error || !lg){
+      showStep('code');
+      $('#codeInput').value = code;
+      $('#codeMsg').textContent = code ? "No league with that code — double-check it." : '';
+      return;
+    }
+    league = lg;
+    const { data: bd } = await db.rpc('league_board', { p_code: code });
+    board = bd || [];
+    renderInvite();
+    showStep('invite');
+  }
+
+  /* ---------- invite landing ---------- */
+  function fmtEnds(d){
+    if (!d) return 'Open season';
+    const dt = new Date(d + 'T00:00:00');
+    return 'Ends ' + dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+  function renderInvite(){
+    $('#invEmoji').textContent = league.emoji || '🏊';
+    $('#invName').textContent = league.name;
+    $('#invHost').textContent = league.host_name;
+    $('#invHostRest').textContent = 'invited you to compete';
+    $('#invCount').textContent = '👥 ' + board.length + ' swimmer' + (board.length === 1 ? '' : 's');
+    $('#invEnds').textContent = '⏱ ' + fmtEnds(league.ends_at);
+    $('#siName').textContent = league.name;
+
+    const top = board.slice(0, 3);
+    const wrap = $('#top3');
+    if (!top.length){
+      wrap.innerHTML = '<p class="tiny">No scores yet — be the first on the board. 🏊</p>';
+    } else {
+      wrap.innerHTML = top.map((s, i) => `
+        <div class="rk">
+          <span class="pos" style="color:${i === 0 ? 'var(--gold)' : 'var(--ink-faint)'}">${i + 1}</span>
+          <span class="av">${initials(s.name)}</span>
+          <span class="nm">${escapeHtml(s.name)}</span>
+          <span class="sc">${s.swim_score ?? '—'}</span>
+        </div>`).join('');
+    }
+  }
+  function escapeHtml(t){ return (t || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+  /* ---------- code entry fallback ---------- */
+  $('#codeGo').onclick = () => {
+    const c = $('#codeInput').value.trim().toUpperCase();
+    if (c.length < 4){ $('#codeMsg').textContent = 'Codes are at least 4 characters.'; return; }
+    $('#codeMsg').textContent = 'Looking…'; showStep('loading'); loadLeague(c);
+  };
+
+  /* ---------- navigation ---------- */
+  $('#joinStart').onclick = () => { showStep('signin'); scrollTo(0, 0); };
+  $('#signinBack').onclick = () => { showStep('invite'); scrollTo(0, 0); };
+  $('#connectBack').onclick = () => { showStep('signin'); scrollTo(0, 0); };
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  $('#signinNext').onclick = () => {
+    const name = $('#dispName').value.trim(), email = $('#email').value.trim();
+    const nameOk = name.length > 1, emailOk = EMAIL_RE.test(email);
+    $('#nameErr').classList.toggle('on', !nameOk);
+    $('#dispName').classList.toggle('err', !nameOk);
+    $('#emailErr').classList.toggle('on', !emailOk);
+    $('#email').classList.toggle('err', !emailOk);
+    if (!nameOk || !emailOk) return;
+    me.name = name; me.email = email;
+    enterConnect();
+  };
+
+  /* ---------- connect step ---------- */
+  function enterConnect(){
+    $('#cnName').textContent = me.name;
+    const admin = league.entry === 'admin';
+    $('#manualPane').style.display = admin ? 'none' : 'block';
+    $('#benchPane').style.display = admin ? 'block' : 'none';
+    $('#cnTitle').textContent = admin ? 'Your results are handled' : 'Add your swimmers';
+    if (admin){
+      $('#benchHost').textContent = league.host_name;
+      $('#benchEmail').textContent = '✉ ' + me.email;
+    } else {
+      renderSliders();
+    }
+    showStep('connect'); scrollTo(0, 0);
+  }
+
+  function renderSliders(){
+    const box = $('#sliders');
+    box.innerHTML = Object.keys(M).map(k => {
+      const step = k === 'volume' ? 0.1 : 1;
+      return `<div class="mrow">
+        <div class="row between">
+          <span class="mlbl">${M[k].label}</span>
+          <span class="mval num"><span id="v_${k}">${me.metrics[k]}</span><small>${M[k].unit.split(' ')[0]}</small></span>
+        </div>
+        <input class="rng" type="range" min="0" max="${M[k].cap}" step="${step}" value="${me.metrics[k]}" data-metric="${k}">
+      </div>`;
+    }).join('') + `<div class="row between mt12">
+        <span style="font-weight:800" class="serif" >SwimScore</span>
+        <span class="num" style="font-weight:900;font-size:1.5rem;color:var(--brand)" id="liveScore">${swimScore(me.metrics)}</span>
+      </div>`;
+    box.querySelectorAll('.rng').forEach(r => r.oninput = () => {
+      const k = r.dataset.metric;
+      me.metrics[k] = +r.value;
+      $('#v_' + k).textContent = k === 'volume' ? (+r.value).toFixed(1) : r.value;
+      $('#liveScore').textContent = swimScore(me.metrics);
+    });
+  }
+
+  /* ---------- submit (join) ---------- */
+  $('#postScore').onclick = () => submitJoin('self');
+  $('#benchGo').onclick = () => submitJoin('admin');
+
+  async function submitJoin(mode){
+    const btn = mode === 'admin' ? $('#benchGo') : $('#postScore');
+    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Joining…';
+
+    const isAdmin = mode === 'admin';
+    const score = isAdmin ? null : swimScore(me.metrics);
+    const status = league.access === 'approve' ? 'pending' : 'joined';
+    const row = {
+      league_id: league.id, name: me.name, email: me.email,
+      join_state: mode, status,
+      count: isAdmin ? null : me.metrics.count,
+      motility: isAdmin ? null : me.metrics.motility,
+      morphology: isAdmin ? null : me.metrics.morphology,
+      volume: isAdmin ? null : me.metrics.volume,
+      swim_score: score
+    };
+    if (db){
+      const { error } = await db.from('league_members').insert(row);
+      if (error) console.error(error);
+      // refresh board to compute an accurate rank
+      const { data: bd } = await db.rpc('league_board', { p_code: league.code });
+      if (bd) board = bd;
+    }
+    renderDone(isAdmin, score, status);
+    showStep('done'); scrollTo(0, 0); fireConfetti();
+    btn.disabled = false; btn.textContent = old;
+  }
+
+  /* ---------- done ---------- */
+  function renderDone(isAdmin, score, status){
+    $('#doneName').textContent = me.name;
+    if (isAdmin){
+      $('#doneSub').innerHTML = 'Your lane is reserved in <b style="color:#fff">' + escapeHtml(league.name) + '</b>. We\'ll ping you when ' + escapeHtml(league.host_name) + ' posts your first result.';
+      $('#debutCard').style.display = 'none';
+      return;
+    }
+    if (status === 'pending'){
+      $('#doneSub').innerHTML = 'You dropped a <b style="color:#fff">' + score + '</b>. ' + escapeHtml(league.host_name) + ' approves new swimmers — you\'ll be on the board once they wave you in.';
+    } else {
+      $('#doneSub').innerHTML = 'You dropped a <b style="color:#fff">' + score + '</b> and slotted straight into the race.';
+    }
+    // rank among joined members (board already includes me if joined)
+    const scores = board.map(s => s.swim_score).filter(v => v != null);
+    const total = Math.max(scores.length, 1);
+    const rank = scores.filter(v => v > score).length + 1;
+    $('#doneRank').textContent = '#' + rank;
+    $('#doneOf').textContent = 'of ' + total + ' swimmer' + (total === 1 ? '' : 's');
+    renderDonut(score);
+  }
+
+  function renderDonut(score){
+    const size = 104, r = size / 2 - 9, c = 2 * Math.PI * r;
+    $('#doneDonut').innerHTML = `
+      <svg width="${size}" height="${size}">
+        <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="var(--surface-3)" stroke-width="9" fill="none"/>
+        <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="var(--brand)" stroke-width="9" fill="none"
+          stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}"/>
+      </svg>
+      <div class="dv"><div><b>${score}</b><span>SwimScore</span></div></div>`;
+    requestAnimationFrame(() => {
+      const ring = $('#doneDonut svg circle:last-child');
+      if (ring){ ring.style.transition = 'stroke-dashoffset 1s var(--ease)'; ring.style.strokeDashoffset = c * (1 - score / 100); }
+    });
+  }
+
+  $('#bragBtn').onclick = () => {
+    const url = location.href;
+    const text = 'I just joined ' + (league?.name || 'the league') + ' on Swimmers 🏊 — think you can beat me? ' + url;
+    if (navigator.share) navigator.share({ text }).catch(() => {});
+    else { navigator.clipboard?.writeText(text); const b = $('#bragBtn'); b.textContent = '✓ Copied — go paste it'; }
+  };
+
+  /* ---------- confetti ---------- */
+  function fireConfetti(){
+    const box = $('#confetti'); if (!box) return;
+    const colors = ['#0E86CE','#03BEE6','#FFC23C','#FF5747','#15BE78','#7A5AE0'];
+    box.innerHTML = '';
+    for (let i = 0; i < 40; i++){
+      const p = document.createElement('i');
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+      p.style.animationDelay = (Math.random() * .4) + 's';
+      p.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+      box.appendChild(p);
+    }
+    box.classList.add('on');
+    setTimeout(() => box.classList.remove('on'), 2800);
+  }
+
+  /* ---------- start ---------- */
+  (function start(){
+    const code = getCode();
+    if (!code){ showStep('code'); return; }
+    showStep('loading'); loadLeague(code);
+  })();
+</script>
+</body>
+</html>
