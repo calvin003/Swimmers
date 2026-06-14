@@ -13,6 +13,7 @@ alter table public.waitlist enable row level security;
 -- 3. Allow anonymous visitors to INSERT their email only.
 --    No select/update/delete policy exists, so the public anon key
 --    cannot read, change, or delete anyone's email.
+drop policy if exists "anyone can join the waitlist" on public.waitlist;
 create policy "anyone can join the waitlist"
   on public.waitlist
   for insert
@@ -37,6 +38,7 @@ alter table public.heart_rate enable row level security;
 
 -- Insert-only for the public anon key, same model as the waitlist:
 -- visitors can log an entry but cannot read, change, or delete any.
+drop policy if exists "anyone can log a heart check" on public.heart_rate;
 create policy "anyone can log a heart check"
   on public.heart_rate
   for insert
