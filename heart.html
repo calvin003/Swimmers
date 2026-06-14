@@ -348,6 +348,40 @@
       <p id="dropNote"></p>
       <a href="leaderboard.html">← Back to swim rankings</a>
     </div>
+
+    <!-- Change a profile photo by email (look-up tool) -->
+    <div class="hr-card" id="photoCard" style="margin-top:22px">
+      <h3 class="serif" style="font-size:1.6rem;margin-bottom:4px">Change a profile photo</h3>
+      <p style="color:var(--ink-dim);font-size:.92rem;margin-bottom:20px">
+        Look up a swimmer by their email, then set the picture shown on the swim rankings and their profile.
+      </p>
+
+      <div class="field">
+        <label for="lookupEmail">Swimmer's email</label>
+        <input type="email" id="lookupEmail" placeholder="person@school.edu" autocomplete="off">
+      </div>
+      <button type="button" id="lookupBtn">Look up swimmer</button>
+
+      <div id="photoEditor" style="display:none;margin-top:24px">
+        <div class="avatar-field">
+          <div class="avatar-pick" id="editAvatarPick" role="button" tabindex="0" aria-label="Choose a new profile photo">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+          <div class="avatar-meta">
+            <label id="editName">—</label>
+            <span class="hint" id="editSub">Click the circle to choose a new photo.</span>
+            <button type="button" class="remove" id="editRemove">Remove chosen photo</button>
+          </div>
+          <input type="file" id="editAvatarFile" accept="image/*" hidden>
+        </div>
+        <button type="button" id="savePhotoBtn" disabled>Save photo</button>
+      </div>
+
+      <p class="form-msg" id="photoMsg" role="status"></p>
+    </div>
   </section>
 </main>
 
@@ -542,6 +576,158 @@
     document.getElementById('hrCard').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
   });
+
+  /* ---------- Change a profile photo by email ---------- */
+  (function(){
+    const lookupEmail = document.getElementById('lookupEmail');
+    const lookupBtn   = document.getElementById('lookupBtn');
+    const editor      = document.getElementById('photoEditor');
+    const pick        = document.getElementById('editAvatarPick');
+    const fileInput   = document.getElementById('editAvatarFile');
+    const removeBtn   = document.getElementById('editRemove');
+    const saveBtn     = document.getElementById('savePhotoBtn');
+    const nameLbl     = document.getElementById('editName');
+    const subLbl      = document.getElementById('editSub');
+    const pmsg        = document.getElementById('photoMsg');
+
+    let target   = null;   // { email, name } of the looked-up swimmer
+    let newPhoto = null;   // chosen photo as a small JPEG data URL
+
+    function say(text, isError){
+      pmsg.textContent = text || '';
+      pmsg.className = 'form-msg' + (isError ? ' error' : '');
+    }
+
+    function resetEditor(){
+      newPhoto = null;
+      saveBtn.disabled = true;
+      pick.classList.remove('has-img');
+      pick.style.backgroundImage = '';
+      removeBtn.style.display = 'none';
+      fileInput.value = '';
+    }
+
+    // any image -> center-cropped 192px square JPEG data URL
+    function processImage(file){
+      return new Promise((resolve, reject) => {
+        if(!file || !file.type.startsWith('image/')) return reject('Please choose an image file.');
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(img.src);
+          const SIZE = 192;
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = SIZE;
+          const side = Math.min(img.width, img.height);
+          canvas.getContext('2d').drawImage(
+            img, (img.width - side)/2, (img.height - side)/2, side, side, 0, 0, SIZE, SIZE
+          );
+          resolve(canvas.toDataURL('image/jpeg', .82));
+        };
+        img.onerror = () => reject('Could not read that image — try another one.');
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    // look the swimmer up by email
+    lookupBtn.addEventListener('click', async () => {
+      const email = lookupEmail.value.trim().toLowerCase();
+      editor.style.display = 'none';
+      resetEditor();
+      target = null;
+      if(!EMAIL_RE.test(email)){ say('Please enter a valid email address.', true); return; }
+
+      lookupBtn.disabled = true;
+      const label = lookupBtn.textContent;
+      lookupBtn.textContent = 'Looking up…';
+      say('');
+
+      const { data, error } = await db
+        .from('heart_leaderboard')
+        .select('*')
+        .ilike('email', email)
+        .limit(1);
+
+      lookupBtn.disabled = false;
+      lookupBtn.textContent = label;
+
+      if(error){ console.error(error); say('Lookup failed. Please try again.', true); return; }
+      if(!data || !data.length){ say('No swimmer found with that email.', true); return; }
+
+      const person = data[0];
+      target = { email: (person.email || email).toLowerCase(), name: (person.name || '').trim() };
+
+      // preview the current photo: backend, then local, then nothing
+      const current = person.avatar_url
+        || localStorage.getItem('swimmers_avatar:' + target.email)
+        || (target.name && localStorage.getItem('swimmers_avatar:' + target.name.toLowerCase()));
+      nameLbl.textContent = target.name || target.email;
+      subLbl.textContent = 'Click the circle to choose a new photo.';
+      if(current){
+        pick.classList.add('has-img');
+        pick.style.backgroundImage = "url('" + current + "')";
+      }
+      editor.style.display = 'block';
+      say('');
+    });
+
+    // choose a new photo
+    pick.addEventListener('click', () => fileInput.click());
+    pick.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); }
+    });
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files[0];
+      if(!file) return;
+      try{
+        const dataUrl = await processImage(file);
+        newPhoto = dataUrl;
+        pick.classList.add('has-img');
+        pick.style.backgroundImage = "url('" + dataUrl + "')";
+        removeBtn.style.display = 'inline';
+        saveBtn.disabled = false;
+        say('');
+      }catch(err){
+        say(typeof err === 'string' ? err : 'Could not read that image.', true);
+      }
+    });
+
+    removeBtn.addEventListener('click', () => { resetEditor(); say(''); });
+
+    // save the new photo
+    saveBtn.addEventListener('click', async () => {
+      if(!target || !newPhoto) return;
+      saveBtn.disabled = true;
+      const label = saveBtn.textContent;
+      saveBtn.textContent = 'Saving…';
+
+      // 1) device-local copy — the rankings & profile read these keys
+      try{
+        localStorage.setItem('swimmers_avatar:' + target.email, newPhoto);
+        if(target.name) localStorage.setItem('swimmers_avatar:' + target.name.toLowerCase(), newPhoto);
+      }catch(_){ /* storage full — backend copy still applies */ }
+
+      // 2) try to persist to the backend for everyone
+      //    (needs an UPDATE policy + avatar_url column on heart_rate)
+      let backendOk = false;
+      try{
+        const { data, error } = await db
+          .from('heart_rate')
+          .update({ avatar_url: newPhoto })
+          .ilike('email', target.email)
+          .select('id');
+        backendOk = !error && Array.isArray(data) && data.length > 0;
+      }catch(_){ /* ignore — local copy still applies */ }
+
+      saveBtn.textContent = label;
+      saveBtn.disabled = true; // require a new pick to re-enable
+
+      const who = target.name || target.email;
+      say(backendOk
+        ? 'Saved ' + who + "'s photo for everyone. 🎉"
+        : 'Saved ' + who + "'s photo on this device — it now shows on the rankings here.", false);
+    });
+  })();
 </script>
 
 </body>
