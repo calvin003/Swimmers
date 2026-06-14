@@ -641,19 +641,32 @@
       lookupBtn.textContent = 'Looking up…';
       say('');
 
+      // pull the board (same source the rankings use) and match in JS, so we
+      // don't depend on the view accepting a server-side email filter
       const { data, error } = await db
         .from('heart_leaderboard')
-        .select('*')
-        .ilike('email', email)
-        .limit(1);
+        .select('*');
 
       lookupBtn.disabled = false;
       lookupBtn.textContent = label;
 
-      if(error){ console.error(error); say('Lookup failed. Please try again.', true); return; }
-      if(!data || !data.length){ say('No swimmer found with that email.', true); return; }
+      if(error){
+        console.error(error);
+        say('Lookup failed: ' + (error.message || 'unknown error') + '.', true);
+        return;
+      }
 
-      const person = data[0];
+      const rows = data || [];
+      const person = rows.find(r => (r.email || '').trim().toLowerCase() === email);
+
+      if(!person){
+        const hasEmail = rows.some(r => r && Object.prototype.hasOwnProperty.call(r, 'email'));
+        say(hasEmail
+          ? 'No swimmer found with that email.'
+          : 'The rankings view doesn’t expose email, so email lookup isn’t available yet.', true);
+        return;
+      }
+
       target = { email: (person.email || email).toLowerCase(), name: (person.name || '').trim() };
 
       // preview the current photo: backend, then local, then nothing
