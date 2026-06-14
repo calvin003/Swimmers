@@ -1,0 +1,84 @@
+<svg width="100%" viewBox="0 0 680 470" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Swimmers kit and packaging</title>
+<desc>What's in the box: the Swimmers retail box, the clip-on scope, three test cartridges, and a collection cup.</desc>
+<defs>
+<linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#EAFBFB"/>
+<stop offset="1" stop-color="#CFEFF1"/>
+</linearGradient>
+<linearGradient id="boxF" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#15A6B3"/>
+<stop offset="1" stop-color="#0A6C78"/>
+</linearGradient>
+<linearGradient id="boxSide" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#0A6C78"/>
+<stop offset="1" stop-color="#085058"/>
+</linearGradient>
+<linearGradient id="boxTop" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#1FBCC9"/>
+<stop offset="1" stop-color="#14929E"/>
+</linearGradient>
+<linearGradient id="dev" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#2BC2CE"/>
+<stop offset="1" stop-color="#0C7E8A"/>
+</linearGradient>
+<radialGradient id="lensG3" cx="0.4" cy="0.35" r="0.8">
+<stop offset="0" stop-color="#7FE9F2"/>
+<stop offset="0.5" stop-color="#0E6B86"/>
+<stop offset="1" stop-color="#04303E"/>
+</radialGradient>
+</defs>
+
+<rect x="0" y="0" width="680" height="470" rx="20" fill="url(#bg3)"/>
+
+<text x="48" y="58" font-family="Verdana, sans-serif" font-weight="bold" font-size="22" fill="#0C7E8A">What's in the box</text>
+<text x="48" y="82" font-family="Verdana, sans-serif" font-size="13" fill="#5C8E96">Everything you need for 3 at-home tests</text>
+
+<ellipse cx="220" cy="392" rx="150" ry="26" fill="#0C5763" opacity="0.15"/>
+
+<polygon points="120,150 300,150 300,360 120,360" fill="url(#boxF)"/>
+<polygon points="300,150 348,118 348,328 300,360" fill="url(#boxSide)"/>
+<polygon points="120,150 168,118 348,118 300,150" fill="url(#boxTop)"/>
+
+<g>
+<circle cx="158" cy="208" r="11" fill="#FFFFFF"/>
+<path d="M148 208 q-15 -8 -27 3 q16 5 27 -3 Z" fill="#FFFFFF"/>
+<text x="178" y="217" font-family="Verdana, sans-serif" font-weight="bold" font-size="27" fill="#FFFFFF">swimmers</text>
+</g>
+<text x="138" y="250" font-family="Verdana, sans-serif" font-size="12.5" letter-spacing="2.5" fill="#BDF0F4">AT-HOME SPERM TEST</text>
+<rect x="138" y="300" width="120" height="2" fill="#BDF0F4" opacity="0.5"/>
+<text x="138" y="326" font-family="Verdana, sans-serif" font-size="12" fill="#E3FAFB">3 tests · results in 15 min</text>
+
+<g>
+<rect x="402" y="120" width="150" height="120" rx="30" fill="url(#dev)"/>
+<rect x="402" y="180" width="150" height="14" fill="#0A6E79" opacity="0.4"/>
+<circle cx="477" cy="158" r="30" fill="#0A2E37"/>
+<circle cx="477" cy="158" r="25" fill="url(#lensG3)"/>
+<ellipse cx="468" cy="149" rx="8" ry="6" fill="#CFF6FB" opacity="0.55"/>
+<text x="477" y="222" text-anchor="middle" font-family="Verdana, sans-serif" font-weight="bold" font-size="12" fill="#FFFFFF">swimmers</text>
+<text x="477" y="270" text-anchor="middle" font-family="Verdana, sans-serif" font-size="12" fill="#5C8E96">The Scope</text>
+</g>
+
+<g>
+<rect x="404" y="300" width="44" height="120" rx="10" fill="#FFFFFF" stroke="#BcdDE0" stroke-width="1.5"/>
+<rect x="404" y="300" width="44" height="30" rx="10" fill="#FF6B57"/>
+<rect x="404" y="322" width="44" height="8" fill="#FF6B57"/>
+<rect x="414" y="346" width="24" height="58" rx="4" fill="#E3F6F7"/>
+<rect x="464" y="300" width="44" height="120" rx="10" fill="#FFFFFF" stroke="#BCDDE0" stroke-width="1.5"/>
+<rect x="464" y="300" width="44" height="30" rx="10" fill="#FF6B57"/>
+<rect x="464" y="322" width="44" height="8" fill="#FF6B57"/>
+<rect x="474" y="346" width="24" height="58" rx="4" fill="#E3F6F7"/>
+<rect x="524" y="300" width="44" height="120" rx="10" fill="#FFFFFF" stroke="#BCDDE0" stroke-width="1.5"/>
+<rect x="524" y="300" width="44" height="30" rx="10" fill="#FF6B57"/>
+<rect x="524" y="322" width="44" height="8" fill="#FF6B57"/>
+<rect x="534" y="346" width="24" height="58" rx="4" fill="#E3F6F7"/>
+<text x="486" y="442" text-anchor="middle" font-family="Verdana, sans-serif" font-size="12" fill="#5C8E96">3 test cartridges</text>
+</g>
+
+<g>
+<path d="M300 360 h70 l-8 56 a6 6 0 0 1 -6 5 h-42 a6 6 0 0 1 -6 -5 Z" fill="#DFF4F6" stroke="#BCDDE0" stroke-width="1.5"/>
+<ellipse cx="335" cy="360" rx="35" ry="8" fill="#FFFFFF" stroke="#BCDDE0" stroke-width="1.5"/>
+<ellipse cx="335" cy="360" rx="27" ry="5" fill="#CDEBEE"/>
+<text x="335" y="442" text-anchor="middle" font-family="Verdana, sans-serif" font-size="12" fill="#5C8E96">Collection cup</text>
+</g>
+</svg>

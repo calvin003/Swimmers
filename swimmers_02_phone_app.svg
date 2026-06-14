@@ -1,0 +1,83 @@
+<svg width="100%" viewBox="0 0 680 560" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Swimmers device on phone with app</title>
+<desc>The Swimmers scope clipped to a smartphone, screen showing a live microscope view of moving sperm and result metrics.</desc>
+<defs>
+<linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#EAFBFB"/>
+<stop offset="1" stop-color="#CFEFF1"/>
+</linearGradient>
+<linearGradient id="phone" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#2A3236"/>
+<stop offset="1" stop-color="#0E1416"/>
+</linearGradient>
+<linearGradient id="capG2" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#2BC2CE"/>
+<stop offset="1" stop-color="#0C7E8A"/>
+</linearGradient>
+<radialGradient id="scope" cx="0.5" cy="0.45" r="0.6">
+<stop offset="0" stop-color="#0A4A55"/>
+<stop offset="1" stop-color="#04222B"/>
+</radialGradient>
+<radialGradient id="lensG2" cx="0.4" cy="0.35" r="0.8">
+<stop offset="0" stop-color="#7FE9F2"/>
+<stop offset="0.5" stop-color="#0E6B86"/>
+<stop offset="1" stop-color="#04303E"/>
+</radialGradient>
+</defs>
+
+<rect x="0" y="0" width="680" height="560" rx="20" fill="url(#bg2)"/>
+
+<ellipse cx="340" cy="516" rx="150" ry="24" fill="#0C5763" opacity="0.16"/>
+
+<rect x="232" y="92" width="216" height="420" rx="40" fill="url(#phone)"/>
+<rect x="244" y="150" width="192" height="350" rx="14" fill="#F7FCFC"/>
+
+<rect x="244" y="150" width="192" height="54" rx="14" fill="#0C7E8A"/>
+<rect x="244" y="178" width="192" height="26" fill="#0C7E8A"/>
+<g>
+<circle cx="270" cy="178" r="7" fill="#FFFFFF"/>
+<path d="M263 178 q-9 -7 -17 -1 q9 4 17 1 Z" fill="#FFFFFF"/>
+<text x="284" y="184" font-family="Verdana, sans-serif" font-weight="bold" font-size="16" fill="#FFFFFF">swimmers</text>
+</g>
+
+<text x="264" y="232" font-family="Verdana, sans-serif" font-size="11" letter-spacing="1.5" fill="#5C8E96">LIVE SAMPLE</text>
+<rect x="264" y="242" width="152" height="118" rx="12" fill="url(#scope)"/>
+<g fill="#7FE9F2">
+<g opacity="0.95">
+<circle cx="300" cy="280" r="5"/><path d="M295 280 q-14 -6 -24 4 q15 4 24 -4 Z"/>
+</g>
+<g opacity="0.9">
+<circle cx="356" cy="300" r="5"/><path d="M351 300 q-14 6 -24 -3 q15 -5 24 3 Z"/>
+</g>
+<g opacity="0.85">
+<circle cx="332" cy="330" r="4.5"/><path d="M327 330 q-12 -7 -22 2 q13 4 22 -2 Z"/>
+</g>
+<g opacity="0.8">
+<circle cx="388" cy="270" r="4.5"/><path d="M383 270 q-12 5 -22 -3 q13 -4 22 3 Z"/>
+</g>
+<g opacity="0.7">
+<circle cx="284" cy="328" r="4"/><path d="M280 328 q-11 6 -20 -2 q12 -4 20 2 Z"/>
+</g>
+</g>
+<circle cx="404" cy="252" r="6" fill="#46E0EC"/>
+
+<rect x="264" y="376" width="72" height="50" rx="10" fill="#E3F6F7"/>
+<text x="300" y="398" text-anchor="middle" font-family="Verdana, sans-serif" font-weight="bold" font-size="19" fill="#0C7E8A">62</text>
+<text x="300" y="414" text-anchor="middle" font-family="Verdana, sans-serif" font-size="8.5" fill="#5C8E96">M/mL COUNT</text>
+
+<rect x="344" y="376" width="72" height="50" rx="10" fill="#E3F6F7"/>
+<text x="380" y="398" text-anchor="middle" font-family="Verdana, sans-serif" font-weight="bold" font-size="19" fill="#0C7E8A">71%</text>
+<text x="380" y="414" text-anchor="middle" font-family="Verdana, sans-serif" font-size="8.5" fill="#5C8E96">MOTILITY</text>
+
+<rect x="264" y="438" width="152" height="40" rx="20" fill="#FF6B57"/>
+<text x="340" y="463" text-anchor="middle" font-family="Verdana, sans-serif" font-weight="bold" font-size="14" fill="#FFFFFF">View full report</text>
+
+<g>
+<rect x="286" y="60" width="108" height="78" rx="24" fill="url(#capG2)"/>
+<rect x="286" y="116" width="108" height="22" rx="6" fill="#0A6E79"/>
+<circle cx="340" cy="92" r="26" fill="#0A2E37"/>
+<circle cx="340" cy="92" r="22" fill="url(#lensG2)"/>
+<ellipse cx="332" cy="84" rx="7" ry="5" fill="#CFF6FB" opacity="0.55"/>
+<text x="340" y="132" text-anchor="middle" font-family="Verdana, sans-serif" font-weight="bold" font-size="9" letter-spacing="0.5" fill="#FFFFFF">swimmers</text>
+</g>
+</svg>
