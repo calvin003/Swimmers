@@ -234,6 +234,11 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
   .lb-sub{font-size:.82rem;color:#9bb0c0}
+  .lb-move{display:inline-flex;align-items:center;gap:.28em;font-weight:700}
+  .lb-move .arrow{font-size:.92em;line-height:1}
+  .lb-move.up{color:#2bb673}
+  .lb-move.down{color:#e0524a}
+  .lb-move.flat{color:#9bb0c0}
   .lb-bar{
     height:9px;border-radius:99px;background:var(--panel);
     border:1px solid var(--border);
@@ -403,6 +408,9 @@
   // randomuser.me portrait set), mapped deterministically per swimmer id
   const YOUNG_FACES = [1,3,4,10,14,15,17,18,26,27,30,35,37,42,43,46,47,51,52,56,57,60,61,62,64,65,67,70,73,77,78,84,85,86,87,88,89,90,92,93,95,96,97,98];
 
+  // only these swimmers show a profile photo; everyone else shows a plain circle
+  const PHOTO_ALLOW = new Set(['langston reid', 'nathan yan']);
+
   // profile photos set via heart.html, keyed by normalised name
   const avatarMap = new Map();
   async function loadAvatars(){
@@ -420,6 +428,48 @@
     || localStorage.getItem('swimmers_avatar:' + (r.email || '').toLowerCase())
     || localStorage.getItem('swimmers_avatar:' + (r.name || '').trim().toLowerCase())
     || `https://randomuser.me/api/portraits/men/${YOUNG_FACES[r.id % YOUNG_FACES.length]}.jpg`;
+
+  // Compares each swimmer's current rank to a snapshot stored from a prior day.
+  // Returns a Map(nameKey -> delta) where +ve = moved up, -ve = down, 0 = no change.
+  function computeRankMovement(best){
+    const SNAP_KEY = 'swimmers_rank_snapshot';
+    const today = new Date().toISOString().slice(0, 10);
+    const current = {};
+    best.forEach((r, i) => { current[(r.name || '').trim().toLowerCase()] = i; });
+
+    let stored = null;
+    try { stored = JSON.parse(localStorage.getItem(SNAP_KEY) || 'null'); } catch(_){}
+
+    let baseline = null, next;
+    if(!stored || !stored.current){
+      next = { baselineDate: today, baseline: current, currentDate: today, current };
+    } else if(stored.currentDate === today){
+      baseline = stored.baseline;            // same day — keep yesterday's baseline
+      next = { ...stored, current };
+    } else {
+      baseline = stored.current;             // new day — yesterday becomes the baseline
+      next = { baselineDate: stored.currentDate, baseline: stored.current, currentDate: today, current };
+    }
+
+    try { localStorage.setItem(SNAP_KEY, JSON.stringify(next)); } catch(_){}
+
+    const moves = new Map();
+    best.forEach((r, i) => {
+      const key = (r.name || '').trim().toLowerCase();
+      const prev = baseline ? baseline[key] : undefined;
+      moves.set(key, (prev == null) ? null : (prev - i));
+    });
+    return moves;
+  }
+
+  // Renders a coloured arrow/dot for a rank delta (null = new/neutral).
+  function moveBadge(delta){
+    if(delta == null || delta === 0)
+      return `<span class="lb-move flat" title="No change since yesterday"><span class="arrow">●</span></span>`;
+    if(delta > 0)
+      return `<span class="lb-move up" title="Up ${delta} since yesterday"><span class="arrow">▲</span>${delta}</span>`;
+    return `<span class="lb-move down" title="Down ${-delta} since yesterday"><span class="arrow">▼</span>${-delta}</span>`;
+  }
 
   async function loadBoard(){
     await loadAvatars();
@@ -445,20 +495,29 @@
       best.push(r);
     }
 
-    const rows = best.map((r, i) => `
+    // rank movement vs. the previous day, tracked locally via a daily snapshot
+    const moveMap = computeRankMovement(best);
+
+    const rows = best.map((r, i) => {
+      const showPhoto = PHOTO_ALLOW.has((r.name || '').trim().toLowerCase());
+      const avatar = showPhoto
+        ? `<span class="lb-avatar" style="background:${COLORS[i % COLORS.length]};background-image:url('${portrait(r)}');background-size:cover;background-position:center"></span>`
+        : `<span class="lb-avatar" style="background:${COLORS[i % COLORS.length]}">${(r.name || '?').trim().charAt(0).toUpperCase()}</span>`;
+      return `
       <a class="lb-row ${i < 5 ? 'top top-' + (i + 1) : ''}" href="profile.html?u=${r.id}" data-name="${(r.name||'').toLowerCase()}">
         <div class="lb-rank ${i < 3 ? 'medal' : ''}">${MEDALS[i] || i + 1}</div>
         <div class="lb-who">
-          <span class="lb-avatar" style="background:${COLORS[i % COLORS.length]};background-image:url('${portrait(r)}');background-size:cover;background-position:center"></span>
+          ${avatar}
           <div>
             <div class="lb-name">${r.name}</div>
             ${TITLES[i] ? `<div class="lb-title">• ${TITLES[i]}</div>` : ''}
-            <div class="lb-sub">${r.origin ? r.origin + ' · ' : ''}${r.resting_hr}→${r.active_hr} bpm · SpO2 ${r.spo2 != null ? r.spo2 + '%' : '—'}</div>
+            <div class="lb-sub">${r.origin ? r.origin + ' · ' : ''}${moveBadge(moveMap.get((r.name||'').trim().toLowerCase()))}</div>
           </div>
         </div>
         <div class="lb-bar"><i data-width="${r.swim_score}"></i></div>
         <div class="lb-score">${r.swim_score}<small>swim score</small></div>
-      </a>`);
+      </a>`;
+    });
 
     rows.push(`
       <div class="lb-row you" data-name="you ${email.toLowerCase()}">

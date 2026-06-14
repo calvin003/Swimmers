@@ -458,24 +458,32 @@
 
     const avatar = document.getElementById('pAvatar');
     avatar.style.background = COLORS[(rankIdx >= 0 ? rankIdx : 0) % COLORS.length];
-    // profile photo set via heart.html (avatars table, keyed by name),
-    // then a device-local copy, else a deterministic placeholder headshot
-    let backendPhoto = null;
-    try{
-      const { data: av } = await db
-        .from('avatars')
-        .select('avatar_url')
-        .eq('name_key', (p.name || '').trim().toLowerCase())
-        .limit(1);
-      if(Array.isArray(av) && av[0]) backendPhoto = av[0].avatar_url;
-    }catch(_){ /* avatars table may not exist yet */ }
-    const uploaded = backendPhoto
-      || p.avatar_url
-      || localStorage.getItem('swimmers_avatar:' + (p.email || '').toLowerCase())
-      || localStorage.getItem('swimmers_avatar:' + (p.name || '').trim().toLowerCase());
-    avatar.style.backgroundImage = `url('${uploaded || `https://randomuser.me/api/portraits/men/${YOUNG_FACES[p.id % YOUNG_FACES.length]}.jpg`}')`;
-    avatar.style.backgroundSize = 'cover';
-    avatar.style.backgroundPosition = 'center';
+
+    // only these swimmers show a profile photo; everyone else shows a plain circle
+    const PHOTO_ALLOW = new Set(['langston reid', 'nathan yan']);
+
+    if(!PHOTO_ALLOW.has((p.name || '').trim().toLowerCase())){
+      avatar.textContent = (p.name || '?').trim().charAt(0).toUpperCase();
+    } else {
+      // profile photo set via heart.html (avatars table, keyed by name),
+      // then a device-local copy, else a deterministic placeholder headshot
+      let backendPhoto = null;
+      try{
+        const { data: av } = await db
+          .from('avatars')
+          .select('avatar_url')
+          .eq('name_key', (p.name || '').trim().toLowerCase())
+          .limit(1);
+        if(Array.isArray(av) && av[0]) backendPhoto = av[0].avatar_url;
+      }catch(_){ /* avatars table may not exist yet */ }
+      const uploaded = backendPhoto
+        || p.avatar_url
+        || localStorage.getItem('swimmers_avatar:' + (p.email || '').toLowerCase())
+        || localStorage.getItem('swimmers_avatar:' + (p.name || '').trim().toLowerCase());
+      avatar.style.backgroundImage = `url('${uploaded || `https://randomuser.me/api/portraits/men/${YOUNG_FACES[p.id % YOUNG_FACES.length]}.jpg`}')`;
+      avatar.style.backgroundSize = 'cover';
+      avatar.style.backgroundPosition = 'center';
+    }
 
     // --- Giant rank hero: "{ordinal} healthiest @ {origin}" ---
     // ranked within the swimmer's own origin; falls back to overall rank.
