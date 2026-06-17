@@ -100,18 +100,22 @@
   .lb-row.top .lb-score small{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--gold-2)}
   a.lb-row.top:hover .lb-name{color:transparent}
 
-  .lb-rank{font-family:var(--serif);font-weight:400;font-size:1.5rem;color:var(--sky-4);text-align:center}
+  .lb-rank{font-family:var(--serif);font-weight:400;font-size:1.5rem;color:var(--ink-faint);text-align:center}
   .lb-rank.medal{font-family:var(--sans);font-size:1.3rem}
   .lb-who{display:flex;align-items:center;gap:13px;min-width:0}
-  .lb-avatar{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#c3d8fd,#3b82f6)}
+  .lb-avatar{width:38px;height:38px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#7ba6f6,#2563eb)}
   .lb-name{font-weight:600;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
   .lb-title{margin:1px 0;font-weight:800;font-size:.82rem;font-style:italic;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(180deg,var(--gold-1) 0%,var(--gold-2) 48%,var(--gold-3) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
   .lb-sub{font-size:.82rem;color:var(--ink-faint)}
   .lb-move{display:inline-flex;align-items:center;gap:.28em;font-weight:700}
   .lb-move .arrow{font-size:.9em;line-height:1}
   .lb-move.up{color:var(--up)} .lb-move.down{color:var(--down)} .lb-move.flat{color:var(--ink-faint)}
-  .lb-bar{height:7px;border-radius:99px;background:var(--sky-1);border:1px solid var(--line);overflow:hidden}
-  .lb-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--sky-3),var(--sky-4));width:0;transition:width .9s var(--ease)}
+  .lb-bar{position:relative;height:11px;border-radius:2px;background:#e7edf6}
+  .lb-bar .fill{position:absolute;left:0;top:0;height:11px;border-radius:2px;width:0;background:repeating-linear-gradient(90deg,var(--sky-deep) 0 5px,rgba(255,255,255,.45) 5px 6px);transition:width .9s var(--ease)}
+  .lb-bar .pswim{position:absolute;top:50%;left:0;width:22px;transform:translate(-55%,-50%);transition:left .9s var(--ease)}
+  .lb-bar .pswim svg{display:block;width:100%;height:auto}
+  .lb-bar .pswim .fA{animation:flapA .28s steps(1) infinite}
+  .lb-bar .pswim .fB{position:absolute;top:0;left:0;width:100%;animation:flapB .28s steps(1) infinite}
   .lb-score{font-family:var(--serif);font-weight:400;font-size:1.7rem;color:var(--ink);text-align:right;line-height:1}
   .lb-score small{display:block;font-family:var(--sans);font-weight:500;font-size:.62rem;color:var(--ink-faint);margin-top:2px}
   .lb-row.you .lb-score{color:var(--ink-soft)}
@@ -129,7 +133,7 @@
     .lb-bar{display:none}
     .foot{flex-direction:column;gap:10px}
   }
-  @media(prefers-reduced-motion:reduce){.pbob,.pbob .fA,.pbob .fB{animation:none}.pbob .fB{opacity:0}}
+  @media(prefers-reduced-motion:reduce){.pbob,.pbob .fA,.pbob .fB,.lb-bar .pswim .fA,.lb-bar .pswim .fB{animation:none}.pbob .fB,.lb-bar .pswim .fB{opacity:0}.lb-bar .fill,.lb-bar .pswim{transition:none}}
 </style>
 </head>
 <body>
@@ -230,7 +234,14 @@
   const MEDALS = ['🥇','🥈','🥉'];
   // honorific shown after the name for the top five swimmers
   const TITLES = ['Sperm King', 'SuckMy Cum Laude', 'Mega Cum Laude', 'Almost Cum Laude', 'Barely Cum Laude'];
-  const COLORS = ['linear-gradient(135deg,#c3d8fd,#3b82f6)','linear-gradient(135deg,#bcdcff,#2563eb)','linear-gradient(135deg,#cfe0ff,#60a5fa)','linear-gradient(135deg,#aecbff,#1d4ed8)','linear-gradient(135deg,#c3d8fd,#3b82f6)','linear-gradient(135deg,#bcdcff,#2563eb)','linear-gradient(135deg,#cfe0ff,#60a5fa)','linear-gradient(135deg,#aecbff,#1d4ed8)'];
+  const COLORS = ['linear-gradient(135deg,#7ba6f6,#2563eb)','linear-gradient(135deg,#9bc0ff,#2563eb)','linear-gradient(135deg,#8fb6f8,#1d4ed8)','linear-gradient(135deg,#a9caff,#3b82f6)','linear-gradient(135deg,#7ba6f6,#2563eb)','linear-gradient(135deg,#9bc0ff,#2563eb)','linear-gradient(135deg,#8fb6f8,#1d4ed8)','linear-gradient(135deg,#a9caff,#3b82f6)'];
+
+  // pixel swimmer that rides the leading edge of each lane fill (two flap frames)
+  const _HEAD=[[12,3],[12,4],[12,5],[13,2],[13,3],[13,4],[13,5],[13,6],[14,2],[14,3],[14,4],[14,5],[14,6],[15,3],[15,4],[15,5]];
+  const _TA=[[0,4],[1,5],[2,6],[3,6],[4,6],[5,6],[6,5],[7,4],[8,3],[9,2],[10,2],[11,2]];
+  const _TB=[[0,4],[1,3],[2,2],[3,2],[4,2],[5,2],[6,3],[7,4],[8,5],[9,6],[10,6],[11,6]];
+  const _rects = t => t.concat(_HEAD).map(p=>`<rect x="${p[0]}" y="${p[1]}" width="1.05" height="1.05"/>`).join('');
+  const laneSwimmer = fill => `<svg class="fA" viewBox="0 0 16 9" style="fill:${fill}">${_rects(_TA)}</svg><svg class="fB" viewBox="0 0 16 9" style="fill:${fill}">${_rects(_TB)}</svg>`;
 
   const email = sessionStorage.getItem('swimmers_email') || '';
   if(email){
@@ -350,7 +361,7 @@
             <div class="lb-sub">${r.origin ? r.origin + ' · ' : ''}${moveBadge(moveMap.get((r.name||'').trim().toLowerCase()))}</div>
           </div>
         </div>
-        <div class="lb-bar"><i data-width="${r.swim_score}"></i></div>
+        <div class="lb-bar"><div class="fill" data-width="${r.swim_score}"></div><div class="pswim" data-width="${r.swim_score}"></div></div>
         <div class="lb-score">${r.swim_score}<small>swim score</small></div>
       </a>`;
     });
@@ -365,7 +376,7 @@
             <div class="lb-sub">no heart check yet — <a href="heart.html" style="color:inherit"><b>log one</b></a></div>
           </div>
         </div>
-        <div class="lb-bar"><i data-width="0"></i></div>
+        <div class="lb-bar"><div class="fill" data-width="0"></div><div class="pswim" data-width="0"></div></div>
         <div class="lb-score">?<small>swim score</small></div>
       </div>`);
 
@@ -376,11 +387,11 @@
 
     card.innerHTML = rows.join('');
 
-    // let the rows paint at width 0, then animate the bars in
+    // drop a flapping swimmer onto each lane, then animate the fills in
+    card.querySelectorAll('.lb-bar .pswim').forEach(p => { p.innerHTML = laneSwimmer('#2563eb'); });
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      card.querySelectorAll('.lb-bar i').forEach(bar => {
-        bar.style.width = bar.dataset.width + '%';
-      });
+      card.querySelectorAll('.lb-bar .fill').forEach(f => { f.style.width = f.dataset.width + '%'; });
+      card.querySelectorAll('.lb-bar .pswim').forEach(p => { p.style.left = p.dataset.width + '%'; });
     }));
   }
   loadBoard();

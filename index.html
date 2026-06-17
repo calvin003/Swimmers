@@ -44,8 +44,9 @@
   .school{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
   .pbob{position:absolute;animation:pbob 1.4s ease-in-out infinite}
   .pbob svg{display:block;width:100%;height:auto}
-  .pbob .fA{animation:flapA .28s steps(1) infinite}
+  .pbob .fA,.pswim .fA{animation:flapA .28s steps(1) infinite}
   .pbob .fB{position:absolute;top:0;left:0;animation:flapB .28s steps(1) infinite}
+  .pswim .fB{position:absolute;top:0;left:0;width:100%;animation:flapB .28s steps(1) infinite}
   @keyframes pbob{0%,100%{transform:translateY(-3px)}50%{transform:translateY(3px)}}
   @keyframes flapA{0%,49%{opacity:1}51%,100%{opacity:0}}
   @keyframes flapB{0%,49%{opacity:0}51%,100%{opacity:1}}
@@ -208,14 +209,17 @@
   .mb-live{display:inline-flex;align-items:center;gap:6px;color:var(--up);font-weight:700}
   .mb-live i{width:7px;height:7px;border-radius:50%;background:var(--up);display:block}
   .mb-row{display:grid;grid-template-columns:24px 28px 1fr auto auto;gap:12px;align-items:center;min-height:60px;padding:11px 20px;border-top:1px solid var(--line)}
-  .mb-row .pos{font-family:var(--serif);font-size:1.2rem;color:var(--sky-4);text-align:center}
-  .mb-av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:.7rem;background:linear-gradient(135deg,#c3d8fd,#3b82f6)}
+  .mb-row .pos{font-family:var(--serif);font-size:1.25rem;color:var(--ink-faint);text-align:center}
+  .mb-row .pos.lead{color:var(--sky-4)}
+  .mb-av{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:.72rem;background:linear-gradient(135deg,#7ba6f6,#2563eb)}
   .mb-mid{min-width:0}
   .mb-nm{font-size:1rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mb-bar{height:6px;border-radius:99px;background:var(--sky-1);margin-top:7px;overflow:hidden}
-  .mb-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--sky-3),var(--sky-4))}
-  .mb-sc{font-family:var(--serif);font-size:1.4rem;color:var(--ink)}
-  .mb-mv{font-size:.75rem;font-weight:700}
+  .lane{position:relative;height:11px;border-radius:2px;background:#e7edf6;margin-top:8px}
+  .lane .fill{position:absolute;left:0;top:0;height:11px;border-radius:2px;width:0;transition:width 1s var(--ease)}
+  .lane .pswim{position:absolute;top:50%;left:0;width:22px;transform:translate(-55%,-50%);transition:left 1s var(--ease)}
+  .lane .pswim svg{display:block;width:100%;height:auto}
+  .mb-sc{font-family:var(--serif);font-size:1.5rem;color:var(--ink)}
+  .mb-mv{font-size:.78rem;font-weight:700}
   .mb-mv.up{color:var(--up)} .mb-mv.down{color:var(--down)} .mb-mv.flat{color:var(--ink-faint)}
   .mb-foot{padding:13px 20px;font-size:.82rem;color:var(--ink-soft);background:var(--cream-2);border-top:1px solid var(--line)}
   .mb-foot b{color:var(--ink)}
@@ -278,7 +282,7 @@
     .foot-top{grid-template-columns:1fr}
     .foot-bot{flex-direction:column;gap:14px}
   }
-  @media(prefers-reduced-motion:reduce){.pbob,.pbob .fA,.pbob .fB{animation:none}.pbob .fB{opacity:0}}
+  @media(prefers-reduced-motion:reduce){.pbob,.pbob .fA,.pbob .fB,.pswim .fA,.pswim .fB{animation:none}.pbob .fB,.pswim .fB{opacity:0}.lane .fill,.lane .pswim{transition:none}}
 </style>
 </head>
 <body>
@@ -450,11 +454,11 @@
         </div>
       </div>
       <div class="miniboard" style="position:relative;z-index:2">
-        <div class="mb-head"><span>THE GROUP CHAT · OPEN · WK 3</span><span class="mb-live"><i></i> Live</span></div>
-        <div class="mb-row"><span class="pos">1</span><span class="mb-av">M</span><div class="mb-mid"><div class="mb-nm">Mike</div><div class="mb-bar"><i style="width:96%"></i></div></div><span class="mb-sc">91</span><span class="mb-mv up">▲2</span></div>
-        <div class="mb-row"><span class="pos">2</span><span class="mb-av">Y</span><div class="mb-mid"><div class="mb-nm">You</div><div class="mb-bar"><i style="width:86%"></i></div></div><span class="mb-sc">82</span><span class="mb-mv up">▲3</span></div>
-        <div class="mb-row"><span class="pos">3</span><span class="mb-av">D</span><div class="mb-mid"><div class="mb-nm">Dave</div><div class="mb-bar"><i style="width:67%"></i></div></div><span class="mb-sc">64</span><span class="mb-mv down">▼1</span></div>
-        <div class="mb-row"><span class="pos">4</span><span class="mb-av">J</span><div class="mb-mid"><div class="mb-nm">Jordan</div><div class="mb-bar"><i style="width:60%"></i></div></div><span class="mb-sc">58</span><span class="mb-mv flat">—</span></div>
+        <div class="mb-head"><span>THE GROUP CHAT OPEN · WK 3</span><span class="mb-live"><i></i> Live</span></div>
+        <div class="mb-row"><span class="pos lead">1</span><span class="mb-av">M</span><div class="mb-mid"><div class="mb-nm">Mike</div><div class="lane"><div class="fill" data-w="96" style="background:repeating-linear-gradient(90deg,#2563eb 0 5px,rgba(255,255,255,.45) 5px 6px)"></div><div class="pswim" data-w="96" data-c="#2563eb"></div></div></div><span class="mb-sc">91</span><span class="mb-mv up">▲2</span></div>
+        <div class="mb-row"><span class="pos">2</span><span class="mb-av">Y</span><div class="mb-mid"><div class="mb-nm">You</div><div class="lane"><div class="fill" data-w="86" style="background:repeating-linear-gradient(90deg,#2563eb 0 5px,rgba(255,255,255,.45) 5px 6px)"></div><div class="pswim" data-w="86" data-c="#2563eb"></div></div></div><span class="mb-sc">82</span><span class="mb-mv up">▲3</span></div>
+        <div class="mb-row"><span class="pos">3</span><span class="mb-av">D</span><div class="mb-mid"><div class="mb-nm">Dave</div><div class="lane"><div class="fill" data-w="67" style="background:repeating-linear-gradient(90deg,#7ba6f6 0 5px,rgba(255,255,255,.45) 5px 6px)"></div><div class="pswim" data-w="67" data-c="#7ba6f6"></div></div></div><span class="mb-sc">64</span><span class="mb-mv down">▼1</span></div>
+        <div class="mb-row"><span class="pos">4</span><span class="mb-av">J</span><div class="mb-mid"><div class="mb-nm">Jordan</div><div class="lane"><div class="fill" data-w="60" style="background:repeating-linear-gradient(90deg,#7ba6f6 0 5px,rgba(255,255,255,.45) 5px 6px)"></div><div class="pswim" data-w="60" data-c="#7ba6f6"></div></div></div><span class="mb-sc">58</span><span class="mb-mv flat">—</span></div>
         <div class="mb-foot"><b>Mike:</b> "enjoy the view of #1 while it lasts boys"</div>
       </div>
     </div>
@@ -599,6 +603,13 @@
     document.querySelectorAll('[data-swim]').forEach(function(el){
       el.innerHTML = '<div class="pbob" style="position:relative;width:56px">'+swimmer('#7ba6f6')+'</div>';
     });
+
+    /* ---------- group-chat lanes: pixel fill + swimmer riding the tip ---------- */
+    document.querySelectorAll('.lane .pswim').forEach(function(p){ p.innerHTML = swimmer(p.dataset.c || '#2563eb'); });
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      document.querySelectorAll('.lane .fill').forEach(function(f){ f.style.width = f.dataset.w + '%'; });
+      document.querySelectorAll('.lane .pswim').forEach(function(p){ p.style.left = p.dataset.w + '%'; });
+    }); });
 
     /* ---------- decorative bar charts ---------- */
     document.querySelectorAll('.barchart').forEach(function(bc){
