@@ -17,19 +17,19 @@
     --font-display:'Inter',system-ui,sans-serif;
     --font-serif:'Instrument Serif',Georgia,serif;
     --sky-1:#a5e3ff; --sky-2:#5db8ef; --sky-3:#3a97da;
-    --brand:#3f87bd; --brand-ink:#2c6c98; --brand-deep:#1c5a86;
-    --accent:#6fbcec; --accent-soft:#e3f3fd;
-    --surface:rgba(255,255,255,.94); --surface-solid:#fff; --surface-2:#f4fafe; --surface-3:#e6f3fc;
-    --ink:#1f3b4d; --ink-soft:#5e7588; --ink-faint:#9bb4c4;
-    --line:#e0eef7; --line-strong:#cfe3f0;
-    --good:#3aa372; --gold:#e3b53e; --lane:#e0664f;
-    --water-1:#9fd3f2; --water-2:#6fb8e8;
-    --r-md:16px; --r-lg:22px;
+    --brand:#3b82f6; --brand-ink:#2563eb; --brand-deep:#1c4fc0;
+    --accent:#7ba6f6; --accent-soft:#eaf1ff;
+    --surface:#ffffff; --surface-solid:#fff; --surface-2:#f4f7fb; --surface-3:#eaf1ff;
+    --ink:#0f1b2d; --ink-soft:#5b6b80; --ink-faint:#93a1b3;
+    --line:#e6eaf1; --line-strong:#e1e7f0;
+    --good:#1d9e6f; --gold:#d8a832; --lane:#e0524a;
+    --water-1:#7ba6f6; --water-2:#3b82f6;
+    --r-md:13px; --r-lg:22px;
     --ease:cubic-bezier(.22,1,.36,1);
-    --gel:linear-gradient(180deg,#bfe7fa 0%,#6fbbe6 38%,#3f8ec6 80%,#5aa6d8 100%);
-    --gel-shadow:inset 0 2px 3px rgba(255,255,255,.8), inset 0 -4px 8px rgba(10,60,100,.26), 0 10px 22px rgba(30,110,165,.34);
-    --shadow-card:0 2px 6px rgba(40,110,160,.08), 0 18px 44px -20px rgba(40,110,160,.30);
-    --shadow-pop:0 28px 70px -24px rgba(30,100,150,.45);
+    --gel:linear-gradient(180deg,#3b82f6 0%,#2f78ef 100%);
+    --gel-shadow:0 1px 2px rgba(37,99,235,.25), 0 12px 24px -12px rgba(37,99,235,.6);
+    --shadow-card:0 1px 2px rgba(20,40,80,.05), 0 18px 44px -22px rgba(20,40,80,.24);
+    --shadow-pop:0 28px 70px -24px rgba(20,40,80,.4);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -37,24 +37,21 @@
     font-family:var(--font-display); color:var(--ink); line-height:1.6;
     min-height:100vh; overflow-x:hidden;
     -webkit-font-smoothing:antialiased;
-    background:
-      radial-gradient(120% 80% at 50% -10%, #cdeeff 0%, transparent 50%),
-      linear-gradient(180deg, var(--sky-2) 0%, var(--sky-3) 30%, #7cc6f0 62%, #dff1fc 100%) fixed;
+    background:radial-gradient(130% 90% at 50% -10%, #eaf1ff 0%, #ffffff 55%) fixed;
   }
   .serif{font-family:var(--font-serif);font-weight:400;letter-spacing:-.01em}
   .num{font-feature-settings:"tnum" 1,"lnum" 1}
+  /* keep decorative sky-tint subtitles legible on the light theme */
+  [style*="#dff1fc"]{color:var(--ink-faint)!important}
 
   /* nav */
   nav{
     display:flex;align-items:center;justify-content:space-between;
     max-width:1140px;margin:0 auto;padding:26px 24px 0;
   }
-  .logo{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:1.25rem;
-    letter-spacing:-.02em;text-shadow:0 1px 8px rgba(30,90,140,.35);text-decoration:none}
-  .logo svg{filter:drop-shadow(0 1px 4px rgba(30,90,140,.35))}
-  .navlink{color:rgba(255,255,255,.92);text-decoration:none;font-weight:600;font-size:.92rem;
-    text-shadow:0 1px 6px rgba(30,90,140,.4)}
-  .navlink:hover{color:#fff}
+  .logo{display:flex;align-items:center;gap:9px;color:var(--ink);font-family:var(--font-serif);font-weight:400;font-size:1.5rem;letter-spacing:-.01em;text-decoration:none}
+  .navlink{color:var(--ink-soft);text-decoration:none;font-weight:600;font-size:.92rem}
+  .navlink:hover{color:var(--ink)}
 
   /* layout */
   .flow{max-width:560px;margin:0 auto;padding:34px 22px 90px}
@@ -68,13 +65,13 @@
   .eyebrow{font-weight:700;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--brand-ink);margin:0}
   .lead{color:var(--ink-soft);font-size:1rem;line-height:1.5;margin:0}
   .tiny{font-size:.78rem;color:var(--ink-faint);font-weight:500}
-  .on-sky{color:#fff;text-shadow:0 2px 22px rgba(40,110,170,.45),0 1px 3px rgba(30,95,145,.35)}
-  .on-sky .lead,.on-sky.lead{color:#e6f5ff}
+  .on-sky{color:var(--ink);text-shadow:none}
+  .on-sky .lead,.on-sky.lead{color:var(--ink-soft)}
 
   /* hero card (step 0) */
   .hero-copy{text-align:center;padding:30px 0 26px}
   .hero-copy .h1{max-width:14ch;margin:18px auto 0}
-  .hero-copy .lead{max-width:30ch;margin:14px auto 0;color:#e6f5ff}
+  .hero-copy .lead{max-width:30ch;margin:14px auto 0;color:var(--ink-soft)}
   .mark{font-size:2.4rem}
 
   /* buttons */
@@ -86,8 +83,8 @@
   .btn-primary,.btn-accent{background:var(--gel);color:#fff;border:1px solid rgba(255,255,255,.6);
     box-shadow:var(--gel-shadow);text-shadow:0 1px 2px rgba(10,60,100,.4)}
   .btn-primary:hover,.btn-accent:hover{filter:brightness(1.05)}
-  .btn-ghost{background:var(--surface);color:var(--brand-ink);border:1.5px solid rgba(255,255,255,.85);backdrop-filter:blur(8px)}
-  .btn-ghost:hover{background:var(--surface-solid)}
+  .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line-strong);box-shadow:var(--shadow-card)}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--brand-ink)}
   .btn-sm{padding:11px 15px;font-size:.88rem;border-radius:12px;width:auto}
   .btn[disabled]{opacity:.45;cursor:not-allowed}
   .btn svg{flex:0 0 auto}
@@ -107,7 +104,7 @@
   .chip{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.74rem;
     padding:6px 11px;border-radius:999px;background:var(--surface-3);color:var(--ink-soft)}
   .chip.brand{background:var(--accent-soft);color:var(--brand-ink)}
-  .chip.sky{background:#ffffff22;color:#eaf8ff}
+  .chip.sky{background:var(--accent-soft);color:var(--brand-ink)}
 
   /* steps progress */
   .steps{display:flex;gap:6px;flex:1}
@@ -176,8 +173,8 @@
   @keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
 
   footer{padding:30px 24px;text-align:center}
-  footer .foot{color:rgba(255,255,255,.85);font-size:.82rem;text-shadow:0 1px 6px rgba(30,90,140,.4)}
-  footer a{color:#fff;text-decoration:none;font-weight:600}
+  footer .foot{color:var(--ink-soft);font-size:.82rem}
+  footer a{color:var(--brand-ink);text-decoration:none;font-weight:600}
 
   @media(prefers-reduced-motion:reduce){
     .step.on,.sheet{animation:none}
@@ -189,7 +186,7 @@
 
 <nav>
   <a class="logo" href="index.html">
-    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7V2z" fill="#fff" opacity=".95"/></svg>
+    <svg width="34" height="16" viewBox="0 0 44 18" aria-hidden="true"><g fill="#3b82f6"><rect x="0" y="9" width="3" height="3"/><rect x="4" y="9" width="3" height="3"/><rect x="8" y="6" width="3" height="3"/><rect x="12" y="6" width="3" height="3"/><rect x="16" y="9" width="3" height="3"/><rect x="20" y="9" width="3" height="3"/><rect x="24" y="6" width="3" height="3"/><rect x="28" y="6" width="3" height="3"/><rect x="32" y="4" width="9" height="9" rx="1"/></g></svg>
     Swimmers
   </a>
   <a class="navlink" href="leaderboard.html">View leaderboard →</a>
