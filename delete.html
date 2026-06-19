@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swimmers — Delete my data</title>
+<meta name="description" content="Permanently delete your Swimmers data.">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f1b2d; --ink-soft:#5b6b80; --ink-faint:#93a1b3;
+    --sky-1:#eaf1ff; --sky-deep:#2563eb; --line:#e1e7f0; --bad:#e0524a; --good:#1d9e6f;
+    --serif:"Instrument Serif",Georgia,serif; --sans:"Inter",system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--sans);color:var(--ink);background:radial-gradient(120% 70% at 50% -8%, var(--sky-1) 0%, #fff 60%);min-height:100vh;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:520px;margin:0 auto;padding:60px 24px}
+  h1{font-family:var(--serif);font-weight:400;font-size:2.4rem;letter-spacing:-.01em}
+  p{color:var(--ink-soft);margin:12px 0}
+  a{color:var(--sky-deep)}
+  label{display:block;font-weight:700;font-size:.85rem;margin:20px 0 7px}
+  input{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:14px;font:inherit;font-weight:600;outline:none}
+  input:focus{border-color:#7ba6f6;box-shadow:0 0 0 4px rgba(59,130,246,.14)}
+  button{width:100%;margin-top:18px;border:0;border-radius:13px;padding:15px;font:inherit;font-weight:800;color:#fff;background:var(--bad);cursor:pointer}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .msg{margin-top:14px;font-weight:600;font-size:.9rem}
+  .msg.err{color:var(--bad)} .msg.ok{color:var(--good)}
+  .back{display:inline-block;margin-top:24px;font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Delete my data</h1>
+  <p>Enter the email you used to join a league or the waitlist. This permanently removes your waitlist entry, all league entries, your scores, and any uploaded photo. <strong>This can't be undone.</strong></p>
+
+  <label for="email">Email</label>
+  <input type="email" id="email" placeholder="you@email.com" autocomplete="email">
+  <button id="go" disabled>Delete everything</button>
+  <p class="msg" id="msg" role="status"></p>
+
+  <a class="back" href="index.html">← Back to Swimmers</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://omfnsjrsswuxkqubagzr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tZm5zanJzc3d1eGtxdWJhZ3pyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjk4MjgsImV4cCI6MjA5NjcwNTgyOH0.lJuGVbc3XZRiQoPPIZjtp1bYNezTVrjt4xKF7-sO-AA';
+  const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const input = document.getElementById('email');
+  const go = document.getElementById('go');
+  const msg = document.getElementById('msg');
+
+  input.addEventListener('input', () => { go.disabled = !EMAIL_RE.test(input.value.trim()); });
+
+  go.addEventListener('click', async () => {
+    const email = input.value.trim().toLowerCase();
+    if(!EMAIL_RE.test(email)) return;
+    if(!confirm('Permanently delete all your Swimmers data? This cannot be undone.')) return;
+
+    go.disabled = true; go.textContent = 'Deleting…'; msg.className = 'msg'; msg.textContent = '';
+    try{
+      const { error } = await db.rpc('delete_my_data', { p_email: email });
+      if(error) throw error;
+      msg.className = 'msg ok';
+      msg.textContent = '✓ Your data has been deleted. It may take a moment to disappear from any boards.';
+      go.textContent = 'Deleted';
+    }catch(e){
+      console.error(e);
+      msg.className = 'msg err';
+      msg.textContent = "Couldn't delete right now. Please try again, or email hello@swimmers.app.";
+      go.disabled = false; go.textContent = 'Delete everything';
+    }
+  });
+</script>
+</body>
+</html>
