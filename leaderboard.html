@@ -390,8 +390,8 @@
     // drop a flapping swimmer onto each lane, then animate the fills in
     card.querySelectorAll('.lb-bar .pswim').forEach(p => { p.innerHTML = laneSwimmer('#2563eb'); });
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      card.querySelectorAll('.lb-bar .fill').forEach(f => { f.style.width = f.dataset.width + '%'; });
-      card.querySelectorAll('.lb-bar .pswim').forEach(p => { p.style.left = p.dataset.width + '%'; });
+      card.querySelectorAll('.lb-bar .fill').forEach(f => { f.style.width = (f.dataset.width / 3000 * 100) + '%'; });
+      card.querySelectorAll('.lb-bar .pswim').forEach(p => { p.style.left = (p.dataset.width / 3000 * 100) + '%'; });
     }));
   }
   loadBoard();
